@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cheetah-orange: #f28a22; /* Main brand accent */
+  --cheetah-dark: #212121; /* Main sidebar/bg */
+  --cheetah-light: #f7f7f7; /* Overall bg */
+  --cheetah-card: #fff; /* Card background */
+  --cheetah-success: #2ecc71; /* Success green */
+}
+
+body {
+  background-color: var(--cheetah-light);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+.cheetah-gradient-btn {
+  @apply bg-gradient-to-r from-[#f28a22] to-[#FF5E62] text-white px-6 py-2 rounded-full font-bold shadow hover:scale-105 transition-all duration-200;
+}
+
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
