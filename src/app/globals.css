@@ -2,34 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --cheetah-orange: #f28a22; /* Main brand accent */
-  --cheetah-dark: #212121; /* Main sidebar/bg */
-  --cheetah-light: #f7f7f7; /* Overall bg */
-  --cheetah-card: #fff; /* Card background */
-  --cheetah-success: #2ecc71; /* Success green */
+body {
+  background-color: #111827; /* Dark blue-gray background */
+  color: #f9fafb; /* Light text for contrast */
 }
 
-body {
-  background-color: var(--cheetah-light);
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+/* Add this new rule for dropdown options */
+.dark-theme-select option {
+  color: #111827;
 }
 
 .cheetah-gradient-btn {
   @apply bg-gradient-to-r from-[#f28a22] to-[#FF5E62] text-white px-6 py-2 rounded-full font-bold shadow hover:scale-105 transition-all duration-200;
 }
 
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* The NEW and IMPROVED glass effect for cards */
+.glass-card {
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 2rem; /* More rounded corners */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  transition: all 0.3s ease;
+  overflow: hidden; /* Important for the pseudo-elements */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* This pseudo-element creates the subtle, top-left highlight */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.2), transparent 30%);
+  border-radius: inherit;
+  pointer-events: none; /* Allows clicks to pass through */
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+/* This creates the main background and a subtle bottom-right reflection */
+.glass-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.05), transparent 40%),
+    rgba(255, 255, 255, 0.03);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* When hovering, we'll make the highlights slightly more prominent */
+.glass-card:hover::before {
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.3), transparent 40%);
+}
+
+/* The content of the card needs to be on top of the pseudo-elements */
+.card-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* ✨ New style for sidebar links ✨ */
+.active-glass-link {
+  background: rgba(249, 115, 22, 0.1); /* Semi-transparent orange */
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }

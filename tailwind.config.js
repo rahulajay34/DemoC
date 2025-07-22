@@ -15,6 +15,7 @@ module.exports = {
         'fade-in': 'fadeIn 1.2s ease both',
         'slide-up': 'slideUp 0.6s ease-out both',
         'scooty-glide': 'scootyGlide 6s ease-in-out infinite',
+        'liquid-move': 'liquid-move 20s ease-in-out infinite alternate',
       },
       keyframes: {
         fadeIn: {
@@ -30,6 +31,10 @@ module.exports = {
           '50%': { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(210%)' },
         },
+        'liquid-move': {
+          'from': { transform: 'translate(-10rem, -20rem) rotate(-30deg)' },
+          'to': { transform: 'translate(20rem, 10rem) rotate(60deg)' }
+        }
       },
     },
   },
