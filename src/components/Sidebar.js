@@ -7,11 +7,17 @@ import {
   FaBicycle,
   FaClipboardList,
   FaHome,
+  FaTachometerAlt,
+  FaUsers,
+  FaMapMarkedAlt,
+  FaTicketAlt,
+  FaWallet,
 } from "react-icons/fa";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import CheetahLogo from "./CheetahLogo";
 import { motion } from "framer-motion"; // Import framer-motion
+
 
 export default function Sidebar() {
   const { logout } = useAuth();
@@ -19,14 +25,14 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const navLinks = [
-    { href: "/", icon: <FaHome size={20} />, label: "Dashboard" },
-    { href: "/riders", icon: <FaUserFriends size={20} />, label: "Riders" },
+    { href: "/", icon: <FaTachometerAlt size={20} />, label: "Dashboard" },
+    { href: "/fleets", icon: <FaMapMarkedAlt size={20} />, label: "Fleets" },
+    { href: "/tracking", icon: <FaBicycle size={20} />, label: "Tracking" },
+    { href: "/riders", icon: <FaUsers size={20} />, label: "Riders" },
     { href: "/bikes", icon: <FaBicycle size={20} />, label: "Bikes" },
-    {
-      href: "/assignments",
-      icon: <FaClipboardList size={20} />,
-      label: "Assignments",
-    },
+    { href: "/assignments", icon: <FaClipboardList size={20} />, label: "Assignments" },
+    { href: "/ticketing", icon: <FaTicketAlt size={20} />, label: "Ticketing" },
+    { href: "/wallet", icon: <FaWallet size={20} />, label: "Wallet Reports" },
   ];
 
   return (
