@@ -4,17 +4,24 @@ import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import { FormModal } from "../../components/FormModal"; // Corrected: Use named import
-import { useToast } from "../../context/ToastContext";
+import { FormModal } from "@/components/FormModal";
+import { useToast } from "@/context/ToastContext";
+import SkeletonTable from "@/components/SkeletonTable";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
+
+// ✨ FIX: Define the form fields array outside the component to prevent re-creation on every render.
+const fleetFormFields = [
+  { name: 'name', label: 'Fleet Name', type: 'text', placeholder: 'e.g., Delhi', required: true },
+  { name: 'location', label: 'Location', type: 'text', placeholder: 'e.g., Delhi, India', required: true },
+];
 
 export default function FleetsPage() {
   const [fleets, setFleets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [chartData, setChartData] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   const fetchFleets = () => {
     setLoading(true);
@@ -26,20 +33,23 @@ export default function FleetsPage() {
         const bikeCounts = data.map(f => f.bikeCount);
         const makeCounts = {};
         data.forEach(fleet => {
-          fleet.bikesByMake.forEach(make => {
-            if (makeCounts[make._id]) {
-              makeCounts[make._id] += make.count;
-            } else {
-              makeCounts[make._id] = make.count;
-            }
-          });
+          if (fleet.bikesByMake) {
+            fleet.bikesByMake.forEach(make => {
+              if (makeCounts[make._id]) {
+                makeCounts[make._id] += make.count;
+              } else {
+                makeCounts[make._id] = make.count;
+              }
+            });
+          }
         });
 
         setChartData({
-          pie: { labels: locationLabels, datasets: [{ data: bikeCounts, backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }] },
+          pie: { labels: locationLabels, datasets: [{ data: bikeCounts, backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'] }] },
           bar: { labels: Object.keys(makeCounts), datasets: [{ label: 'Bikes by Make', data: Object.values(makeCounts), backgroundColor: '#FFCE56' }] }
         });
       })
+      .catch((error) => toast.error(`Failed to load fleet data: ${error.message}`))
       .finally(() => setLoading(false));
   };
 
@@ -57,31 +67,48 @@ export default function FleetsPage() {
         body: JSON.stringify(formData),
       });
       if (res.ok) {
-        showToast("Fleet added successfully!", "success");
-        fetchFleets(); // Refresh data
+        toast.success("Fleet added successfully!");
+        fetchFleets();
       } else {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Failed to add fleet');
       }
     } catch (error) {
-      showToast(error.message, "error");
+      toast.error(error.message);
     } finally {
       setIsModalOpen(false);
     }
   };
+  
+  const exportToExcel = (bikesData, fileName) => {
+    if (!bikesData || bikesData.length === 0) {
+      toast.info("No data available to download.");
+      return;
+    }
+    const formattedData = bikesData.map(bike => ({
+      'Bike Number': bike.number,
+      'Make': bike.make,
+      'Model': bike.model,
+      'Status': bike.status,
+      'Condition': bike.condition,
+    }));
 
-  const fleetFormFields = [
-    { name: 'name', label: 'Fleet Name', type: 'text', placeholder: 'e.g., Delhi' },
-    { name: 'location', label: 'Location', type: 'text', placeholder: 'e.g., Delhi, India' },
-  ];
-
-  const exportToExcel = (data, fileName) => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Bikes");
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
     saveAs(blob, fileName);
+  };
+
+  const handleDownloadAllotted = () => {
+    const allottedBikes = fleets.flatMap(f => f.allottedBikes || []);
+    exportToExcel(allottedBikes, 'allotted-bikes.xlsx');
+  };
+
+  const handleDownloadUnallotted = () => {
+    const unallottedBikes = fleets.flatMap(f => f.unallottedBikes || []);
+    exportToExcel(unallottedBikes, 'unallotted-bikes.xlsx');
   };
 
   return (
@@ -94,29 +121,29 @@ export default function FleetsPage() {
         title="Add New Fleet"
       />
       <section className="animate-fade-in glass-card p-6 md:p-8">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Fleets Dashboard</h2>
           <button onClick={handleAddFleet} className="cheetah-gradient-btn">
             Add Fleet
           </button>
         </div>
-        {loading ? <p>Loading...</p> : (
+        {loading ? <SkeletonTable columns={2} rows={2} /> : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Bikes by Location</h3>
-                {chartData && chartData.pie.labels.length > 0 ? <Pie data={chartData.pie} /> : <p>No data to display.</p>}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="p-4 bg-black/20 rounded-lg">
+                <h3 className="text-xl font-semibold mb-4 text-center">Bikes by Location</h3>
+                {chartData && chartData.pie.labels.length > 0 ? <Pie data={chartData.pie} /> : <p className="text-center text-white/50 h-64 flex items-center justify-center">No data to display.</p>}
               </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-4">Bikes by Make</h3>
-                {chartData && chartData.bar.labels.length > 0 ? <Bar data={chartData.bar} /> : <p>No data to display.</p>}
+              <div className="p-4 bg-black/20 rounded-lg">
+                <h3 className="text-xl font-semibold mb-4 text-center">Bikes by Make</h3>
+                {chartData && chartData.bar.labels.length > 0 ? <Bar data={chartData.bar} /> : <p className="text-center text-white/50 h-64 flex items-center justify-center">No data to display.</p>}
               </div>
             </div>
-            <div className="mt-8">
-              <button onClick={() => exportToExcel(fleets.flatMap(f => f.allottedBikes), 'allotted-bikes.xlsx')} className="cheetah-gradient-btn">
+            <div className="flex justify-center gap-4">
+              <button onClick={handleDownloadAllotted} className="cheetah-gradient-btn">
                 Download Allotted Bikes
               </button>
-              <button onClick={() => exportToExcel(fleets.flatMap(f => f.unallottedBikes), 'unallotted-bikes.xlsx')} className="cheetah-gradient-btn ml-4">
+              <button onClick={handleDownloadUnallotted} className="cheetah-gradient-btn">
                 Download Unallotted Bikes
               </button>
             </div>

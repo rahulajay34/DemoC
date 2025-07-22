@@ -3,7 +3,7 @@ import { AuthProvider } from "../context/AuthContext";
 import { ToastProvider } from "../context/ToastContext";
 import Toast from "../components/Toast";
 import MainLayout from "@/components/MainLayout";
-import FlairLines from "@/components/FlairLines"; // Import the new flair component
+import FlairLines from "@/components/FlairLines";
 
 function AnimatedBackground() {
   return (
@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <ToastProvider>
             <AnimatedBackground />
-            <FlairLines /> {/* ✨ Add the new flair lines here ✨ */}
+            <FlairLines />
             <MainLayout>{children}</MainLayout>
             <Toast />
           </ToastProvider>

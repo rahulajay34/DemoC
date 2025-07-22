@@ -1,27 +1,22 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import { FormModal } from "../../components/FormModal"; // Corrected: Use named import
-import { useToast } from "../../context/ToastContext";
+import { FormModal } from "@/components/FormModal";
+import { useToast } from "@/context/ToastContext";
 
 export default function WalletPage() {
   const [transactions, setTransactions] = useState([]);
   const [riders, setRiders] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   const fetchTransactions = () => {
-    fetch('/api/wallet')
-      .then(res => res.json())
-      .then(data => setTransactions(data));
+    fetch('/api/wallet').then(res => res.json()).then(data => setTransactions(data));
   };
-
   const fetchRiders = () => {
-    fetch('/api/riders')
-      .then(res => res.json())
-      .then(data => setRiders(data));
+    fetch('/api/riders').then(res => res.json()).then(data => setRiders(data));
   };
 
   useEffect(() => {
@@ -39,20 +34,21 @@ export default function WalletPage() {
         body: JSON.stringify(formData),
       });
       if (res.ok) {
-        showToast("Transaction added successfully!", "success");
-        fetchTransactions(); // Refresh the list
+        toast.success("Transaction added successfully!");
+        fetchTransactions();
       } else {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Failed to add transaction');
       }
     } catch (error) {
-      showToast(error.message, "error");
+      toast.error(error.message);
     } finally {
       setIsModalOpen(false);
     }
   };
-  
-  const transactionFormFields = [
+
+  // ✨ FIX: Wrap dynamic form fields in useMemo
+  const transactionFormFields = useMemo(() => [
     { name: 'rider', label: 'Rider', type: 'select', options: riders.map(r => ({ value: r._id, label: r.name })) },
     { name: 'type', label: 'Transaction Type', type: 'select', options: [
       { value: 'monthly_charge', label: 'Monthly Charge' },
@@ -62,7 +58,7 @@ export default function WalletPage() {
     ]},
     { name: 'amount', label: 'Amount', type: 'number', placeholder: 'e.g., 500' },
     { name: 'description', label: 'Description', type: 'text', placeholder: 'Describe the transaction' },
-  ];
+  ], [riders]);
 
   const filteredTransactions = transactions.filter(t =>
     t.rider?.name.toLowerCase().includes(searchQuery.toLowerCase())

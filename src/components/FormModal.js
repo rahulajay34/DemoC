@@ -1,18 +1,21 @@
 "use client";
 import { useState, useEffect } from "react";
 
-export const FormModal = ({ isOpen, onClose, onSubmit, fields, title, initialData }) => {
+export const FormModal = ({ isOpen, onClose, onSubmit, fields, title, initialData = {} }) => {
   const [formData, setFormData] = useState({});
 
   useEffect(() => {
+    // Initialize form data based on fields
     const initial = fields.reduce((acc, field) => {
-      acc[field.name] = initialData?.[field.name] || '';
+      acc[field.name] = initialData[field.name] || "";
       return acc;
     }, {});
     setFormData(initial);
-  }, [isOpen, initialData, fields]);
+  }, [isOpen, fields, initialData]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,8 +28,8 @@ export const FormModal = ({ isOpen, onClose, onSubmit, fields, title, initialDat
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
-      <div className="bg-gray-900/80 backdrop-blur-sm border border-white/20 p-8 rounded-2xl shadow-lg w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 transition-opacity duration-300">
+      <div className="bg-gray-900/80 backdrop-blur-sm border border-white/20 p-8 rounded-2xl shadow-lg w-full max-w-md animate-fade-in-up">
         <h2 className="text-2xl font-bold mb-6 text-white">{title}</h2>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
@@ -59,6 +62,7 @@ export const FormModal = ({ isOpen, onClose, onSubmit, fields, title, initialDat
                     value={formData[field.name] || ''}
                     onChange={handleChange}
                     className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    required
                   />
                 )}
               </div>
@@ -68,7 +72,7 @@ export const FormModal = ({ isOpen, onClose, onSubmit, fields, title, initialDat
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white font-semibold transition-colors"
+              className="px-6 py-2 rounded-lg bg-gray-600 hover:bg-gray-700 text-white font-semibold transition-colors"
             >
               Cancel
             </button>
