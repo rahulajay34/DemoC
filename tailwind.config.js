@@ -14,6 +14,7 @@ module.exports = {
       animation: {
         'fade-in': 'fadeIn 1.2s ease both',
         'slide-up': 'slideUp 0.6s ease-out both',
+        'scooty-glide': 'scootyGlide 6s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -23,6 +24,11 @@ module.exports = {
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(42px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        scootyGlide: {
+          '0%': { transform: 'translateX(-1150%)' },
+          '50%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(210%)' },
         },
       },
     },

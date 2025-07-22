@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import ProtectedRoute from "../components/ProtectedRoute";
 import SkeletonCardGrid from "@/components/SkeletonCardGrid";
+import Image from "next/image";
+import scooty from "../../public/scooty.gif"; // 🛑 Ensure this file exists in /public
 
 export default function Dashboard() {
   const [counts, setCounts] = useState({ riders: 0, bikes: 0, assignments: 0 });
@@ -42,7 +44,7 @@ export default function Dashboard() {
             {["riders", "bikes", "assignments"].map((type) => (
               <div
                 key={type}
-                className="rounded-2xl p-8 bg-cheetah-gradient shadow-cheetah flex flex-col items-center animate-slide-up"
+                className="relative rounded-2xl p-8 bg-cheetah-gradient shadow-cheetah flex flex-col items-center animate-slide-up overflow-hidden"
               >
                 <div className="text-5xl font-extrabold text-white drop-shadow-lg">
                   {counts[type]}
@@ -50,6 +52,18 @@ export default function Dashboard() {
                 <div className="mt-2 text-lg text-white font-medium capitalize">
                   {type}
                 </div>
+
+                {/* 🚀 Scooty animation in Riders card only */}
+                {type === "riders" && (
+                  <div className="absolute bottom-3 right-3 opacity-80 animate-scooty-glide">
+                    <Image
+                      src={scooty} // 🛑 You must place this file in /public/scooty.gif
+                      alt="Scooty"
+                      width={40}
+                      height={40}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
