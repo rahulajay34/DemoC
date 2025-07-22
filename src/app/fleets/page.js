@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Bar, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { saveAs } from "file-saver";
@@ -10,7 +10,7 @@ import SkeletonTable from "@/components/SkeletonTable";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
-// ✨ FIX: Define the form fields array outside the component to prevent re-creation on every render.
+// Define form fields outside the component to prevent re-creation on render. This is stable.
 const fleetFormFields = [
   { name: 'name', label: 'Fleet Name', type: 'text', placeholder: 'e.g., Delhi', required: true },
   { name: 'location', label: 'Location', type: 'text', placeholder: 'e.g., Delhi, India', required: true },
@@ -23,7 +23,12 @@ export default function FleetsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
-  const fetchFleets = () => {
+  // Create a stable empty object for the form's initial data using useMemo.
+  // This prevents the prop from being re-created on every render.
+  const initialData = useMemo(() => ({}), []);
+
+  // Memoize fetchFleets to prevent it from being recreated on every render.
+  const fetchFleets = useCallback(() => {
     setLoading(true);
     fetch("/api/fleets")
       .then((res) => res.json())
@@ -35,15 +40,10 @@ export default function FleetsPage() {
         data.forEach(fleet => {
           if (fleet.bikesByMake) {
             fleet.bikesByMake.forEach(make => {
-              if (makeCounts[make._id]) {
-                makeCounts[make._id] += make.count;
-              } else {
-                makeCounts[make._id] = make.count;
-              }
+              makeCounts[make._id] = (makeCounts[make._id] || 0) + make.count;
             });
           }
         });
-
         setChartData({
           pie: { labels: locationLabels, datasets: [{ data: bikeCounts, backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'] }] },
           bar: { labels: Object.keys(makeCounts), datasets: [{ label: 'Bikes by Make', data: Object.values(makeCounts), backgroundColor: '#FFCE56' }] }
@@ -51,15 +51,14 @@ export default function FleetsPage() {
       })
       .catch((error) => toast.error(`Failed to load fleet data: ${error.message}`))
       .finally(() => setLoading(false));
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchFleets();
-  }, []);
+  }, [fetchFleets]);
 
-  const handleAddFleet = () => setIsModalOpen(true);
-
-  const handleFleetSubmit = async (formData) => {
+  // Memoize the form submission handler.
+  const handleFleetSubmit = useCallback(async (formData) => {
     try {
       const res = await fetch('/api/fleets', {
         method: 'POST',
@@ -68,7 +67,7 @@ export default function FleetsPage() {
       });
       if (res.ok) {
         toast.success("Fleet added successfully!");
-        fetchFleets();
+        fetchFleets(); // Call the memoized fetch function
       } else {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Failed to add fleet');
@@ -78,8 +77,12 @@ export default function FleetsPage() {
     } finally {
       setIsModalOpen(false);
     }
-  };
-  
+  }, [toast, fetchFleets]);
+
+  // Memoize modal open/close handlers for stability.
+  const handleAddFleet = useCallback(() => setIsModalOpen(true), []);
+  const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
+
   const exportToExcel = (bikesData, fileName) => {
     if (!bikesData || bikesData.length === 0) {
       toast.info("No data available to download.");
@@ -115,15 +118,20 @@ export default function FleetsPage() {
     <>
       <FormModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onSubmit={handleFleetSubmit}
         fields={fleetFormFields}
+        initialData={initialData} 
         title="Add New Fleet"
       />
       <section className="animate-fade-in glass-card p-6 md:p-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Fleets Dashboard</h2>
-          <button onClick={handleAddFleet} className="cheetah-gradient-btn">
+          <button 
+            onClick={handleAddFleet} 
+            className="cheetah-gradient-btn"
+            style={{ cursor: 'pointer', position: 'relative', zIndex: 10 }}
+          >
             Add Fleet
           </button>
         </div>
@@ -140,10 +148,10 @@ export default function FleetsPage() {
               </div>
             </div>
             <div className="flex justify-center gap-4">
-              <button onClick={handleDownloadAllotted} className="cheetah-gradient-btn">
+              <button onClick={handleDownloadAllotted} className="cheetah-gradient-btn" style={{ cursor: 'pointer' }}>
                 Download Allotted Bikes
               </button>
-              <button onClick={handleDownloadUnallotted} className="cheetah-gradient-btn">
+              <button onClick={handleDownloadUnallotted} className="cheetah-gradient-btn" style={{ cursor: 'pointer' }}>
                 Download Unallotted Bikes
               </button>
             </div>
