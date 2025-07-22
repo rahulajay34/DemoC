@@ -2,13 +2,8 @@ import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
 import { ToastProvider } from "../context/ToastContext";
 import Toast from "../components/Toast";
-import MainLayout from "@/components/MainLayout"; // Correctly import the new component
-
-export const metadata = {
-  title: "Cheetah Admin",
-  description: "Admin dashboard for Cheetah services",
-  icons: [{ rel: "icon", url: "/favicon.svg" }],
-};
+import MainLayout from "@/components/MainLayout";
+import FlairLines from "@/components/FlairLines"; // Import the new flair component
 
 function AnimatedBackground() {
   return (
@@ -29,6 +24,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <ToastProvider>
             <AnimatedBackground />
+            <FlairLines /> {/* ✨ Add the new flair lines here ✨ */}
             <MainLayout>{children}</MainLayout>
             <Toast />
           </ToastProvider>

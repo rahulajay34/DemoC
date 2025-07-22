@@ -27,20 +27,30 @@ body {
   overflow: hidden; /* Important for the pseudo-elements */
 }
 
-/* This pseudo-element creates the subtle, top-left highlight */
+/* ✨ New Spotlight/Aurora effect that follows the mouse ✨ */
 .glass-card::before {
   content: '';
   position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.2), transparent 30%);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    400px circle at var(--mouse-x) var(--mouse-y),
+    rgba(255, 255, 255, 0.15),
+    transparent 80%
+  );
   border-radius: inherit;
-  pointer-events: none; /* Allows clicks to pass through */
-  transition: all 0.3s ease;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
   z-index: 1;
 }
+
+/* When hovering, the spotlight becomes visible */
+.glass-card:hover::before {
+  opacity: 1;
+}
+
 
 /* This creates the main background and a subtle bottom-right reflection */
 .glass-card::after {
@@ -50,17 +60,12 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background:
+  background: 
     radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.05), transparent 40%),
     rgba(255, 255, 255, 0.03);
   border-radius: inherit;
   pointer-events: none;
   z-index: 0;
-}
-
-/* When hovering, we'll make the highlights slightly more prominent */
-.glass-card:hover::before {
-  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.3), transparent 40%);
 }
 
 /* The content of the card needs to be on top of the pseudo-elements */
@@ -74,4 +79,5 @@ body {
   background: rgba(249, 115, 22, 0.1); /* Semi-transparent orange */
   border: 1px solid rgba(249, 115, 22, 0.2);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  z-index: 0;
 }

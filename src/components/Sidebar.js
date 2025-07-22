@@ -10,7 +10,8 @@ import {
 } from "react-icons/fa";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import CheetahLogo from "./CheetahLogo"; // Import the new component
+import CheetahLogo from "./CheetahLogo";
+import { motion } from "framer-motion"; // Import framer-motion
 
 export default function Sidebar() {
   const { logout } = useAuth();
@@ -30,7 +31,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Top bar for mobile */}
+      {/* ... (mobile top bar is unchanged) ... */}
       <div className="md:hidden flex items-center justify-between px-4 py-3 bg-gray-950 text-white shadow-lg">
         <button aria-label="Open menu" onClick={() => setOpen(true)}>
           <FaBars size={26} />
@@ -62,13 +63,23 @@ export default function Sidebar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 ${
+                  className={`relative flex items-center gap-4 p-4 rounded-xl transition-colors duration-300 ${
                     isActive
-                      ? "active-glass-link text-white font-semibold"
-                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                      ? "text-white font-semibold"
+                      : "text-gray-400 hover:text-white"
                   }`}
                 >
-                  {link.icon} {link.label}
+                  {/* ✨ This is the animated sliding indicator ✨ */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="active-pill"
+                      className="absolute inset-0 active-glass-link"
+                      style={{ borderRadius: "0.75rem" }}
+                      transition={{ duration: 0.6, type: "spring" }}
+                    />
+                  )}
+                  <span className="relative z-10">{link.icon}</span>
+                  <span className="relative z-10">{link.label}</span>
                 </Link>
               );
             })}
@@ -82,8 +93,8 @@ export default function Sidebar() {
         </button>
       </nav>
 
-      {/* Overlay for mobile drawer */}
-      {open && (
+      {/* ... (overlay is unchanged) ... */}
+       {open && (
         <div
           onClick={() => setOpen(false)}
           className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 md:hidden"

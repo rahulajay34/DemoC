@@ -14,8 +14,10 @@ module.exports = {
       animation: {
         'fade-in': 'fadeIn 1.2s ease both',
         'slide-up': 'slideUp 0.6s ease-out both',
-        'scooty-glide': 'scootyGlide 7s ease-in-out infinite',
+        'scooty-glide': 'scootyGlide 6s ease-in-out infinite',
         'liquid-move': 'liquid-move 20s ease-in-out infinite alternate',
+        'flair-line-1': 'flair-line-1 25s linear infinite', // New animation
+        'flair-line-2': 'flair-line-2 30s linear infinite', // New animation
       },
       keyframes: {
         fadeIn: {
@@ -34,7 +36,16 @@ module.exports = {
         'liquid-move': {
           'from': { transform: 'translate(-10rem, -20rem) rotate(-30deg)' },
           'to': { transform: 'translate(20rem, 10rem) rotate(60deg)' }
-        }
+        },
+        // ✨ New keyframes for the flair lines ✨
+        'flair-line-1': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        'flair-line-2': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
       },
     },
   },
