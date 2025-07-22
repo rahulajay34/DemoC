@@ -9,12 +9,13 @@ import {
   FaHome,
 } from "react-icons/fa";
 import { useState } from "react";
-import { usePathname } from "next/navigation"; // To track the active page
+import { usePathname } from "next/navigation";
+import CheetahLogo from "./CheetahLogo"; // Import the new component
 
 export default function Sidebar() {
   const { logout } = useAuth();
   const [open, setOpen] = useState(false);
-  const pathname = usePathname(); // Get the current URL path
+  const pathname = usePathname();
 
   const navLinks = [
     { href: "/", icon: <FaHome size={20} />, label: "Dashboard" },
@@ -34,7 +35,7 @@ export default function Sidebar() {
         <button aria-label="Open menu" onClick={() => setOpen(true)}>
           <FaBars size={26} />
         </button>
-        <span className="font-extrabold text-xl text-orange-400">CHEETAH 🐾</span>
+        <CheetahLogo className="w-[118px] h-[30px] text-orange-400" />
       </div>
 
       {/* Main Sidebar */}
@@ -50,9 +51,9 @@ export default function Sidebar() {
           &times;
         </span>
         <div>
-          <h1 className="font-extrabold text-3xl mb-12 hidden md:block text-orange-400 px-4">
-            CHEETAH 🐾
-          </h1>
+          <div className="mb-12 hidden md:block px-2">
+            <CheetahLogo className="w-[158px] h-[40px] text-orange-400" />
+          </div>
           <div className="flex flex-col gap-3 text-lg font-medium">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;

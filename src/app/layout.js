@@ -4,6 +4,12 @@ import { ToastProvider } from "../context/ToastContext";
 import Toast from "../components/Toast";
 import MainLayout from "@/components/MainLayout"; // Correctly import the new component
 
+export const metadata = {
+  title: "Cheetah Admin",
+  description: "Admin dashboard for Cheetah services",
+  icons: [{ rel: "icon", url: "/favicon.svg" }],
+};
+
 function AnimatedBackground() {
   return (
     <div className="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden">
