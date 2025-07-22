@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import ProtectedRoute from "../../components/ProtectedRoute";
 import SkeletonTable from "@/components/SkeletonTable";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
@@ -13,7 +12,7 @@ export default function AssignmentsPage() {
   const [bikes, setBikes] = useState([]);
   const [selectedRider, setSelectedRider] = useState("");
   const [selectedBike, setSelectedBike] = useState("");
-  const [tenureMonths, setTenureMonths] = useState(1);
+  const [tenureMonths, setTenureMonths] = useState(""); // Changed initial value to empty string
   const [monthlyCharge, setMonthlyCharge] = useState("");
   const [searchActive, setSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -92,7 +91,7 @@ export default function AssignmentsPage() {
       toast.success("✅ Assignment successful");
       setSelectedRider("");
       setSelectedBike("");
-      setTenureMonths(1);
+      setTenureMonths(""); // Changed reset value to empty string
       setMonthlyCharge("");
       fetchData();
     } else {
@@ -154,7 +153,6 @@ export default function AssignmentsPage() {
   }, [searchQuery, assignments]);
 
   return (
-    <ProtectedRoute>
       <section className="animate-fade-in glass-card p-6 md:p-8">
         <div className="card-content">
           {/* 🔍 Header & Search */}
@@ -318,6 +316,5 @@ export default function AssignmentsPage() {
           )}
         </div>
       </section>
-    </ProtectedRoute>
   );
 }
