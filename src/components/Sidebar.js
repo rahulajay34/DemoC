@@ -7,6 +7,7 @@ import {
   FaBicycle,
   FaClipboardList,
   FaHome,
+  FaTicketAlt, // Import the new icon
 } from "react-icons/fa";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
@@ -27,6 +28,7 @@ export default function Sidebar() {
       icon: <FaClipboardList size={20} />,
       label: "Assignments",
     },
+    { href: "/tickets", icon: <FaTicketAlt size={20} />, label: "Ticketing" }, // Add new link
   ];
 
   return (
@@ -94,7 +96,7 @@ export default function Sidebar() {
       </nav>
 
       {/* ... (overlay is unchanged) ... */}
-       {open && (
+      {open && (
         <div
           onClick={() => setOpen(false)}
           className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-40 md:hidden"
