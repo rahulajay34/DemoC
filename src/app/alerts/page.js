@@ -229,7 +229,7 @@ export default function AlertsPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card bg-gradient-to-br from-red-500/5 to-red-600/5 p-4 sm:p-6 rounded-2xl border border-red-500/10"
+          className="glass-card bg-gradient-to-br from-red-500/3 to-red-600/3 p-4 sm:p-6 rounded-2xl border border-red-500/8"
         >
           <div className="flex items-center gap-2 sm:gap-3 mb-2">
             <FaExclamationTriangle className="text-red-400 text-sm sm:text-base" size={16} />
