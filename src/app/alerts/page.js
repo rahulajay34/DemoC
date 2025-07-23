@@ -149,7 +149,7 @@ export default function AlertsPage() {
 
   const getAlertColor = (type) => {
     switch (type) {
-      case "error": return "from-red-500/20 to-red-600/20 border-red-500/30";
+      case "error": return "from-red-500/5 to-red-600/5 border-red-500/10";
       case "warning": return "from-yellow-500/20 to-yellow-600/20 border-yellow-500/30";
       case "info": return "from-blue-500/20 to-blue-600/20 border-blue-500/30";
       case "success": return "from-green-500/20 to-green-600/20 border-green-500/30";
@@ -159,7 +159,7 @@ export default function AlertsPage() {
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case "high": return "bg-red-500/20 text-red-400";
+      case "high": return "bg-red-500/10 text-red-400";
       case "medium": return "bg-yellow-500/20 text-yellow-400";
       case "low": return "bg-green-500/20 text-green-400";
       default: return "bg-gray-500/20 text-gray-400";
@@ -197,44 +197,45 @@ export default function AlertsPage() {
   const unreadCount = alerts.filter(alert => alert.status === "unread").length;
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-4 sm:p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3 flex-wrap">
             <FaBell className="text-yellow-500" />
-            Alerts & Notifications
+            <span>Alerts & Notifications</span>
             {unreadCount > 0 && (
-              <span className="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2">
+              <span className="bg-red-500/80 text-white text-sm px-2 py-1 rounded-full">
                 {unreadCount}
               </span>
             )}
           </h1>
-          <p className="text-gray-400 mt-1">Monitor and manage system alerts and notifications</p>
+          <p className="text-gray-400 mt-1 text-sm sm:text-base">Monitor and manage system alerts and notifications</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors"
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg flex items-center gap-2 transition-colors text-sm sm:text-base"
           >
-            <FaCog /> Settings
+            <FaCog className="text-sm sm:text-base" /> 
+            <span className="hidden sm:inline">Settings</span>
           </motion.button>
         </div>
       </div>
 
       {/* Alert Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-red-500/20 to-red-600/20 p-6 rounded-2xl border border-gray-700/50"
+          className="glass-card bg-gradient-to-br from-red-500/5 to-red-600/5 p-4 sm:p-6 rounded-2xl border border-red-500/10"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <FaExclamationTriangle className="text-red-400" size={20} />
-            <span className="text-gray-400">Critical</span>
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <FaExclamationTriangle className="text-red-400 text-sm sm:text-base" size={16} />
+            <span className="text-gray-400 text-xs sm:text-sm">Critical</span>
           </div>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-xl sm:text-2xl font-bold text-white">
             {alerts.filter(a => a.type === "error").length}
           </p>
         </motion.div>
@@ -243,13 +244,13 @@ export default function AlertsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 p-6 rounded-2xl border border-gray-700/50"
+          className="glass-card bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 p-4 sm:p-6 rounded-2xl border border-yellow-500/30"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <FaExclamationTriangle className="text-yellow-400" size={20} />
-            <span className="text-gray-400">Warnings</span>
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <FaExclamationTriangle className="text-yellow-400 text-sm sm:text-base" size={16} />
+            <span className="text-gray-400 text-xs sm:text-sm">Warnings</span>
           </div>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-xl sm:text-2xl font-bold text-white">
             {alerts.filter(a => a.type === "warning").length}
           </p>
         </motion.div>
@@ -258,13 +259,13 @@ export default function AlertsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 p-6 rounded-2xl border border-gray-700/50"
+          className="glass-card bg-gradient-to-br from-blue-500/20 to-blue-600/20 p-4 sm:p-6 rounded-2xl border border-blue-500/30"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <FaInfoCircle className="text-blue-400" size={20} />
-            <span className="text-gray-400">Info</span>
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <FaInfoCircle className="text-blue-400 text-sm sm:text-base" size={16} />
+            <span className="text-gray-400 text-xs sm:text-sm">Info</span>
           </div>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-xl sm:text-2xl font-bold text-white">
             {alerts.filter(a => a.type === "info").length}
           </p>
         </motion.div>
@@ -273,36 +274,36 @@ export default function AlertsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-gradient-to-br from-green-500/20 to-green-600/20 p-6 rounded-2xl border border-gray-700/50"
+          className="glass-card bg-gradient-to-br from-green-500/20 to-green-600/20 p-4 sm:p-6 rounded-2xl border border-green-500/30"
         >
-          <div className="flex items-center gap-3 mb-2">
-            <FaEyeSlash className="text-green-400" size={20} />
-            <span className="text-gray-400">Unread</span>
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <FaEyeSlash className="text-green-400 text-sm sm:text-base" size={16} />
+            <span className="text-gray-400 text-xs sm:text-sm">Unread</span>
           </div>
-          <p className="text-2xl font-bold text-white">{unreadCount}</p>
+          <p className="text-xl sm:text-2xl font-bold text-white">{unreadCount}</p>
         </motion.div>
       </div>
 
       {/* Filters */}
-      <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50 mb-8">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1">
+      <div className="glass-card bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-3 sm:p-4 lg:p-6 rounded-2xl border border-gray-700/50 mb-4 sm:mb-6 lg:mb-8">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <div className="w-full">
             <div className="relative">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
               <input
                 type="text"
                 placeholder="Search alerts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-800/50 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none backdrop-blur-sm transition-all duration-300 text-sm sm:text-base placeholder-gray-400"
               />
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-gray-800/50 text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none backdrop-blur-sm transition-all duration-300 text-sm sm:text-base dark-theme-select"
             >
               <option value="all">All Types</option>
               <option value="error">Critical</option>
@@ -313,7 +314,7 @@ export default function AlertsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+              className="w-full bg-gray-800/50 text-white px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none backdrop-blur-sm transition-all duration-300 text-sm sm:text-base dark-theme-select"
             >
               <option value="all">All Status</option>
               <option value="unread">Unread</option>
@@ -329,79 +330,81 @@ export default function AlertsPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {filteredAlerts.map((alert, index) => (
             <motion.div
               key={alert._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className={`bg-gradient-to-br ${getAlertColor(alert.type)} p-6 rounded-2xl border backdrop-blur-sm 
-                ${alert.status === "unread" ? "shadow-lg" : "opacity-75"}`}
+              className={`glass-card bg-gradient-to-br ${getAlertColor(alert.type)} p-3 sm:p-4 lg:p-6 rounded-xl sm:rounded-2xl border backdrop-blur-sm transition-all duration-300
+                ${alert.status === "unread" ? "shadow-lg ring-1 ring-white/10 hover:shadow-xl" : "opacity-75 hover:opacity-90"}`}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-4 flex-1">
-                  <div className="w-10 h-10 rounded-full bg-gray-800/50 flex items-center justify-center">
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="flex items-start gap-3 flex-1 min-w-0">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800/50 flex items-center justify-center flex-shrink-0 border border-gray-700/50">
                     {getAlertIcon(alert.type)}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-white font-semibold">{alert.title}</h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(alert.priority)}`}>
-                        {alert.priority}
-                      </span>
-                      {alert.status === "unread" && (
-                        <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
-                      )}
-                    </div>
-                    <p className="text-gray-300 mb-3">{alert.message}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-400">
-                      <div className="flex items-center gap-1">
-                        <FaClock size={12} />
-                        {alert.createdAt.toLocaleString()}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col xs:flex-row xs:items-center gap-2 mb-2">
+                      <h3 className="text-white font-semibold text-sm sm:text-base line-clamp-2">{alert.title}</h3>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(alert.priority)} flex-shrink-0`}>
+                          {alert.priority}
+                        </span>
+                        {alert.status === "unread" && (
+                          <span className="w-2 h-2 bg-blue-400 rounded-full flex-shrink-0 animate-pulse"></span>
+                        )}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <FaCalendarAlt size={12} />
-                        {alert.category}
+                    </div>
+                    <p className="text-gray-300 mb-3 text-sm sm:text-base leading-relaxed line-clamp-3">{alert.message}</p>
+                    <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4 text-xs sm:text-sm text-gray-400">
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <FaClock size={10} />
+                        <span className="truncate">{alert.createdAt.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <FaCalendarAlt size={10} />
+                        <span>{alert.category}</span>
                       </div>
                       {alert.readAt && (
-                        <div className="text-green-400">
+                        <div className="text-green-400 truncate flex-shrink-0">
                           Read at {alert.readAt.toLocaleString()}
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 ml-4">
+                <div className="flex items-center justify-end gap-2 flex-shrink-0 border-t border-gray-700/30 pt-3">
                   {alert.status === "unread" ? (
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => markAsRead(alert._id)}
-                      className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+                      className="p-2.5 sm:p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-all duration-200 min-w-[40px] min-h-[40px] sm:min-w-[36px] sm:min-h-[36px] flex items-center justify-center"
                       title="Mark as read"
                     >
-                      <FaEye size={14} />
+                      <FaEye size={14} className="sm:w-3 sm:h-3" />
                     </motion.button>
                   ) : (
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => markAsUnread(alert._id)}
-                      className="p-2 bg-gray-500/20 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-colors"
+                      className="p-2.5 sm:p-2 bg-gray-500/20 text-gray-400 rounded-lg hover:bg-gray-500/30 transition-all duration-200 min-w-[40px] min-h-[40px] sm:min-w-[36px] sm:min-h-[36px] flex items-center justify-center"
                       title="Mark as unread"
                     >
-                      <FaEyeSlash size={14} />
+                      <FaEyeSlash size={14} className="sm:w-3 sm:h-3" />
                     </motion.button>
                   )}
                   <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => deleteAlert(alert._id)}
-                    className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                    className="p-2.5 sm:p-2 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-all duration-200 min-w-[40px] min-h-[40px] sm:min-w-[36px] sm:min-h-[36px] flex items-center justify-center"
                     title="Delete alert"
                   >
-                    <FaTrash size={14} />
+                    <FaTrash size={14} className="sm:w-3 sm:h-3" />
                   </motion.button>
                 </div>
               </div>

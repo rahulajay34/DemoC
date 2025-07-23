@@ -9,13 +9,13 @@ import {
   FaChartLine,
   FaPrint,
   FaSearch,
-  FaUsers,
   FaBicycle,
   FaCreditCard,
   FaWrench,
   FaFileExport,
   FaFilePdf,
-  FaFileExcel
+  FaFileExcel,
+  FaUsers
 } from "react-icons/fa";
 
 export default function ReportsPage() {
