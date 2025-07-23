@@ -1,17 +1,9 @@
 import "./globals.css";
-import { Inter } from "next/font/google";
 import { AuthProvider } from "../context/AuthContext";
 import { ToastProvider } from "../context/ToastContext";
 import Toast from "../components/Toast";
 import MainLayout from "@/components/MainLayout";
 import FlairLines from "@/components/FlairLines"; // Import the new flair component
-
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata = {
-  title: "Cheetah Admin",
-  description: "Admin panel for Cheetah a bike rental service.",
-};
 
 function AnimatedBackground() {
   return (
@@ -27,8 +19,8 @@ function AnimatedBackground() {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="h-full bg-gray-900">
-      <body className={`${inter.className} h-full`}>
+    <html lang="en">
+      <body>
         <AuthProvider>
           <ToastProvider>
             <AnimatedBackground />

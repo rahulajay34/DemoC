@@ -30,34 +30,6 @@ export default function Dashboard() {
         setDashboardData(data);
       } catch (err) {
         console.error("Error loading dashboard data:", err);
-        // Fallback to individual API calls for backward compatibility
-        try {
-          const [r, b, a] = await Promise.all([
-            fetch("/api/riders").then((res) => res.json()),
-            fetch("/api/bikes").then((res) => res.json()),
-            fetch("/api/assignments").then((res) => res.json()),
-          ]);
-          setDashboardData({
-            summary: {
-              totalRiders: r.riders?.length || r.length || 0,
-              activeRiders: r.riders?.filter(rider => rider.status === 'active').length || 0,
-              totalBikes: b.bikes?.length || b.length || 0,
-              availableBikes: b.bikes?.filter(bike => bike.status === 'available').length || 0,
-              activeAssignments: a.assignments?.length || a.length || 0,
-              totalRevenue: 0,
-              pendingMaintenance: 0,
-              overduePayments: 0,
-              pendingPayments: 0,
-              maintenanceBikes: 0,
-              utilizationRate: 0
-            },
-            trends: { revenueGrowth: 0, assignmentGrowth: 0 },
-            analytics: { topRiders: [] },
-            recentActivity: { assignments: [], payments: [], maintenance: [] }
-          });
-        } catch (fallbackErr) {
-          console.error("Fallback API calls also failed:", fallbackErr);
-        }
       } finally {
         setLoading(false);
       }
@@ -343,5 +315,70 @@ export default function Dashboard() {
         <p className="text-gray-400 mt-4">Your fleet management system is running smoothly!</p>
       </motion.div>
     </div>
+  );
+}
+
+
+  return (
+    <section>
+      <h2 className="text-3xl font-bold mb-8">Dashboard</h2>
+
+      {loading ? (
+        <SkeletonCardGrid count={3} />
+      ) : (
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            visible: {
+              transition: {
+                staggerChildren: 0.2,
+              },
+            },
+          }}
+        >
+          {["riders", "bikes", "assignments"].map((type) => (
+            <Link href={`/${type}`} key={type} className="group">
+              <motion.div
+                className="glass-card h-48 flex items-center justify-center"
+                variants={cardVariants}
+                whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
+                onMouseMove={handleMouseMove} // Activate the spotlight effect on mouse move
+              >
+                <div className="card-content text-center">
+                  {/* ✨ Default State Content - Fades out on hover ✨ */}
+                  <div className="transition-opacity duration-300 group-hover:opacity-0">
+                    <div className="text-6xl font-extrabold text-white drop-shadow-lg">
+                      {counts[type]}
+                    </div>
+                    <div className="mt-2 text-lg text-white/80 font-medium capitalize">
+                      {type}
+                    </div>
+                  </div>
+
+                  {/* ✨ Hover State Content - Fades in on hover ✨ */}
+                  <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+                    <p className="text-white text-2xl font-bold">View {type}</p>
+                  </div>
+
+                  {/* Scooty animation remains in the background */}
+                  {type === "riders" && (
+                    <div className="absolute bottom-3 right-3 opacity-50 group-hover:opacity-80 transition-opacity duration-300 animate-scooty-glide">
+                      <Image
+                        src={scooty}
+                        alt="Scooty"
+                        width={40}
+                        height={40}
+                      />
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </Link>
+          ))}
+        </motion.div>
+      )}
+    </section>
   );
 }

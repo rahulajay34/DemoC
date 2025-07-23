@@ -1,7 +1,8 @@
+// src/app/api/maintenance/route.js
+
 import { connectToDB } from "../../../utils/db";
-import Bike from "../../../models/Bike.js";
-import Assignment from "../../../models/Assignment";
 import Maintenance from "../../../models/Maintenance";
+import Bike from "../../../models/Bike";
 
 export async function GET(request) {
   try {
@@ -10,24 +11,15 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page')) || 1;
     const limit = parseInt(searchParams.get('limit')) || 10;
-    const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || '';
     const type = searchParams.get('type') || '';
-    const zone = searchParams.get('zone') || '';
+    const priority = searchParams.get('priority') || '';
+    const bikeId = searchParams.get('bikeId') || '';
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     // Build query
     let query = { isActive: true };
-    
-    if (search) {
-      query.$or = [
-        { make: { $regex: search, $options: 'i' } },
-        { model: { $regex: search, $options: 'i' } },
-        { number: { $regex: search, $options: 'i' } },
-        { registrationNumber: { $regex: search, $options: 'i' } }
-      ];
-    }
     
     if (status) {
       query.status = status;
@@ -37,53 +29,54 @@ export async function GET(request) {
       query.type = type;
     }
     
-    if (zone) {
-      query['location.zone'] = zone;
+    if (priority) {
+      query.priority = priority;
+    }
+    
+    if (bikeId) {
+      query.bike = bikeId;
     }
 
     // Calculate pagination
     const skip = (page - 1) * limit;
     
     // Get total count
-    const total = await Bike.countDocuments(query);
+    const total = await Maintenance.countDocuments(query);
     
-    // Get bikes with pagination and sorting
-    const bikes = await Bike.find(query)
-      .populate('assignedTo', 'name email phone')
+    // Get maintenance records with pagination and sorting
+    const maintenanceRecords = await Maintenance.find(query)
+      .populate('bike', 'make model number registrationNumber status')
       .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
       .skip(skip)
-      .limit(limit)
-      .select('-documents -insurance -maintenance.serviceHistory');
+      .limit(limit);
     
     // Get analytics
-    const analytics = await Bike.aggregate([
+    const analytics = await Maintenance.aggregate([
       { $match: { isActive: true } },
       {
         $group: {
           _id: '$status',
           count: { $sum: 1 },
-          avgRating: { $avg: '$rating' },
-          avgAge: { $avg: { $subtract: [new Date().getFullYear(), '$year'] } }
+          totalCost: { $sum: '$cost.total' },
+          avgDuration: { $avg: '$actualDuration' }
         }
       }
     ]);
     
-    // Get type distribution
-    const typeDistribution = await Bike.aggregate([
+    // Get priority distribution
+    const priorityDistribution = await Maintenance.aggregate([
       { $match: { isActive: true } },
       {
         $group: {
-          _id: '$type',
+          _id: '$priority',
           count: { $sum: 1 },
-          available: { 
-            $sum: { $cond: [{ $eq: ['$status', 'available'] }, 1, 0] }
-          }
+          avgCost: { $avg: '$cost.total' }
         }
       }
     ]);
 
     return new Response(JSON.stringify({
-      bikes,
+      maintenance: maintenanceRecords,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(total / limit),
@@ -91,15 +84,15 @@ export async function GET(request) {
         itemsPerPage: limit
       },
       analytics,
-      typeDistribution
+      priorityDistribution
     }), { 
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error("GET /api/bikes error:", error);
+    console.error("GET /api/maintenance error:", error);
     return new Response(JSON.stringify({ 
-      error: "Failed to fetch bikes",
+      error: "Failed to fetch maintenance records",
       details: error.message 
     }), { 
       status: 500,
@@ -115,7 +108,7 @@ export async function POST(request) {
     const data = await request.json();
     
     // Validate required fields
-    const requiredFields = ['make', 'model', 'number', 'registrationNumber', 'chassisNumber', 'engineNumber', 'year', 'type', 'fuelType', 'color', 'purchaseDate', 'purchasePrice'];
+    const requiredFields = ['bike', 'type', 'category', 'description', 'scheduledDate'];
     for (const field of requiredFields) {
       if (!data[field]) {
         return new Response(JSON.stringify({ 
@@ -127,36 +120,40 @@ export async function POST(request) {
       }
     }
     
-    // Check for duplicate numbers
-    const existingBike = await Bike.findOne({ 
-      $or: [
-        { number: data.number },
-        { registrationNumber: data.registrationNumber },
-        { chassisNumber: data.chassisNumber },
-        { engineNumber: data.engineNumber }
-      ]
-    });
-    
-    if (existingBike) {
+    // Check if bike exists
+    const bike = await Bike.findById(data.bike);
+    if (!bike) {
       return new Response(JSON.stringify({ 
-        error: "Bike with this number, registration, chassis, or engine number already exists" 
+        error: "Bike not found" 
       }), { 
-        status: 409,
+        status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
     
-    const bike = await Bike.create(data);
+    // Create maintenance record
+    const maintenance = await Maintenance.create(data);
+    
+    // Update bike status if maintenance is urgent
+    if (data.priority === 'critical' && bike.status === 'available') {
+      await Bike.findByIdAndUpdate(data.bike, {
+        status: 'maintenance'
+      });
+    }
+    
+    // Populate the created maintenance record
+    const populatedMaintenance = await Maintenance.findById(maintenance._id)
+      .populate('bike', 'make model number registrationNumber');
     
     return new Response(JSON.stringify({
-      message: "Bike created successfully",
-      bike
+      message: "Maintenance record created successfully",
+      maintenance: populatedMaintenance
     }), { 
       status: 201,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error("POST /api/bikes error:", error);
+    console.error("POST /api/maintenance error:", error);
     
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => err.message);
@@ -170,7 +167,7 @@ export async function POST(request) {
     }
     
     return new Response(JSON.stringify({ 
-      error: "Failed to create bike",
+      error: "Failed to create maintenance record",
       details: error.message 
     }), { 
       status: 500,

@@ -1,7 +1,9 @@
+// src/app/api/payments/route.js
+
 import { connectToDB } from "../../../utils/db";
-import Bike from "../../../models/Bike.js";
+import Payment from "../../../models/Payment";
 import Assignment from "../../../models/Assignment";
-import Maintenance from "../../../models/Maintenance";
+import Rider from "../../../models/Rider";
 
 export async function GET(request) {
   try {
@@ -10,24 +12,15 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page')) || 1;
     const limit = parseInt(searchParams.get('limit')) || 10;
-    const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || '';
     const type = searchParams.get('type') || '';
-    const zone = searchParams.get('zone') || '';
+    const riderId = searchParams.get('riderId') || '';
+    const assignmentId = searchParams.get('assignmentId') || '';
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     // Build query
     let query = { isActive: true };
-    
-    if (search) {
-      query.$or = [
-        { make: { $regex: search, $options: 'i' } },
-        { model: { $regex: search, $options: 'i' } },
-        { number: { $regex: search, $options: 'i' } },
-        { registrationNumber: { $regex: search, $options: 'i' } }
-      ];
-    }
     
     if (status) {
       query.status = status;
@@ -37,53 +30,61 @@ export async function GET(request) {
       query.type = type;
     }
     
-    if (zone) {
-      query['location.zone'] = zone;
+    if (riderId) {
+      query.rider = riderId;
+    }
+    
+    if (assignmentId) {
+      query.assignment = assignmentId;
     }
 
     // Calculate pagination
     const skip = (page - 1) * limit;
     
     // Get total count
-    const total = await Bike.countDocuments(query);
+    const total = await Payment.countDocuments(query);
     
-    // Get bikes with pagination and sorting
-    const bikes = await Bike.find(query)
-      .populate('assignedTo', 'name email phone')
+    // Get payments with pagination and sorting
+    const payments = await Payment.find(query)
+      .populate('rider', 'name email phone')
+      .populate('assignment', 'assignmentId startDate endDate')
       .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
       .skip(skip)
-      .limit(limit)
-      .select('-documents -insurance -maintenance.serviceHistory');
+      .limit(limit);
     
     // Get analytics
-    const analytics = await Bike.aggregate([
+    const analytics = await Payment.aggregate([
       { $match: { isActive: true } },
       {
         $group: {
           _id: '$status',
           count: { $sum: 1 },
-          avgRating: { $avg: '$rating' },
-          avgAge: { $avg: { $subtract: [new Date().getFullYear(), '$year'] } }
+          totalAmount: { $sum: '$amount' },
+          avgAmount: { $avg: '$amount' }
         }
       }
     ]);
     
-    // Get type distribution
-    const typeDistribution = await Bike.aggregate([
+    // Get payment method distribution
+    const methodDistribution = await Payment.aggregate([
       { $match: { isActive: true } },
       {
         $group: {
-          _id: '$type',
+          _id: '$paymentMethod',
           count: { $sum: 1 },
-          available: { 
-            $sum: { $cond: [{ $eq: ['$status', 'available'] }, 1, 0] }
-          }
+          totalAmount: { $sum: '$amount' }
         }
       }
     ]);
+    
+    // Get overdue payments
+    const overduePayments = await Payment.countDocuments({
+      isActive: true,
+      status: 'overdue'
+    });
 
     return new Response(JSON.stringify({
-      bikes,
+      payments,
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(total / limit),
@@ -91,15 +92,16 @@ export async function GET(request) {
         itemsPerPage: limit
       },
       analytics,
-      typeDistribution
+      methodDistribution,
+      overdueCount: overduePayments
     }), { 
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error("GET /api/bikes error:", error);
+    console.error("GET /api/payments error:", error);
     return new Response(JSON.stringify({ 
-      error: "Failed to fetch bikes",
+      error: "Failed to fetch payments",
       details: error.message 
     }), { 
       status: 500,
@@ -115,7 +117,7 @@ export async function POST(request) {
     const data = await request.json();
     
     // Validate required fields
-    const requiredFields = ['make', 'model', 'number', 'registrationNumber', 'chassisNumber', 'engineNumber', 'year', 'type', 'fuelType', 'color', 'purchaseDate', 'purchasePrice'];
+    const requiredFields = ['assignment', 'rider', 'type', 'amount', 'dueDate', 'paymentMethod'];
     for (const field of requiredFields) {
       if (!data[field]) {
         return new Response(JSON.stringify({ 
@@ -127,36 +129,52 @@ export async function POST(request) {
       }
     }
     
-    // Check for duplicate numbers
-    const existingBike = await Bike.findOne({ 
-      $or: [
-        { number: data.number },
-        { registrationNumber: data.registrationNumber },
-        { chassisNumber: data.chassisNumber },
-        { engineNumber: data.engineNumber }
-      ]
-    });
-    
-    if (existingBike) {
+    // Check if assignment exists
+    const assignment = await Assignment.findById(data.assignment);
+    if (!assignment) {
       return new Response(JSON.stringify({ 
-        error: "Bike with this number, registration, chassis, or engine number already exists" 
+        error: "Assignment not found" 
       }), { 
-        status: 409,
+        status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
     
-    const bike = await Bike.create(data);
+    // Check if rider exists
+    const rider = await Rider.findById(data.rider);
+    if (!rider) {
+      return new Response(JSON.stringify({ 
+        error: "Rider not found" 
+      }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Create payment record
+    const payment = await Payment.create(data);
+    
+    // If payment is successful, update assignment
+    if (data.status === 'paid') {
+      await Assignment.findByIdAndUpdate(data.assignment, {
+        $inc: { paidAmount: data.amount }
+      });
+    }
+    
+    // Populate the created payment
+    const populatedPayment = await Payment.findById(payment._id)
+      .populate('rider', 'name email phone')
+      .populate('assignment', 'assignmentId');
     
     return new Response(JSON.stringify({
-      message: "Bike created successfully",
-      bike
+      message: "Payment record created successfully",
+      payment: populatedPayment
     }), { 
       status: 201,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error("POST /api/bikes error:", error);
+    console.error("POST /api/payments error:", error);
     
     if (error.name === 'ValidationError') {
       const validationErrors = Object.values(error.errors).map(err => err.message);
@@ -170,7 +188,7 @@ export async function POST(request) {
     }
     
     return new Response(JSON.stringify({ 
-      error: "Failed to create bike",
+      error: "Failed to create payment record",
       details: error.message 
     }), { 
       status: 500,
