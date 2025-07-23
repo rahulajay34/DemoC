@@ -1,17 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import ProtectedRoute from "../../components/ProtectedRoute.js";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
 import SkeletonTable from "@/components/SkeletonTable";
-import { FormModal } from "@/components/FormModal";
-
-// ✨ FIX: Define form fields outside the component
-const riderFormFields = [
-  { name: 'name', label: 'Name', type: 'text', placeholder: 'e.g., Arjun Sharma' },
-  { name: 'email', label: 'Email', type: 'email', placeholder: 'arjun@example.com' },
-  { name: 'phone', label: 'Phone', type: 'tel', placeholder: '10-digit number' },
-  { name: 'address', label: 'Address', type: 'text', placeholder: 'Full address' },
-];
 
 export default function RidersPage() {
   const [riders, setRiders] = useState([]);
@@ -19,10 +11,15 @@ export default function RidersPage() {
   const [searchActive, setSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { toast } = useToast();
 
-  const fetchRiders = () => {
+  const nameRef = useRef();
+  const emailRef = useRef();
+  const phoneRef = useRef();
+  const addrRef = useRef();
+
+  useEffect(() => {
     setLoading(true);
     fetch("/api/riders")
       .then((res) => res.json())
@@ -30,34 +27,38 @@ export default function RidersPage() {
         setRiders(data);
         setFilteredRiders(data);
       })
-      .catch(() => toast.error("Failed to load riders"))
+      .catch(() => {
+        toast.error("Failed to load riders");
+      })
       .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchRiders();
   }, []);
 
-  const handleAddRider = () => setIsModalOpen(true);
-
-  const handleRiderSubmit = async (formData) => {
+  async function handleAddRider(e) {
+    e.preventDefault();
     try {
       const res = await fetch("/api/riders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: nameRef.current.value,
+          email: emailRef.current.value,
+          phone: phoneRef.current.value,
+          address: addrRef.current.value,
+        }),
       });
 
       if (!res.ok) throw new Error("Failed to add rider");
-      
+
+      const updated = await fetch("/api/riders").then((res) => res.json());
+      setRiders(updated);
+      setFilteredRiders(updated);
+      setSearchQuery("");
+      e.target.reset();
       toast.success("Rider added successfully ✅");
-      fetchRiders();
     } catch (error) {
       toast.error("Error adding rider ❌");
-    } finally {
-        setIsModalOpen(false);
     }
-  };
+  }
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -71,67 +72,123 @@ export default function RidersPage() {
   }, [searchQuery, riders]);
 
   return (
-    <>
-      <FormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleRiderSubmit}
-        fields={riderFormFields}
-        title="Add New Rider"
-      />
+    <ProtectedRoute>
       <section className="animate-fade-in glass-card p-6 md:p-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Riders Manager</h2>
-          <div className="flex items-center gap-4">
-              <button
-                  onClick={() => setSearchActive((prev) => !prev)}
-                  className="text-white/80 hover:text-white p-2"
-              >
-                  {searchActive ? <FaTimes size={22} /> : <FaSearch size={22} />}
-              </button>
-              <button onClick={handleAddRider} className="cheetah-gradient-btn">
-                  Add Rider
-              </button>
+        <div className="card-content">
+          {/* Header & Search Toggle */}
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Riders</h2>
+            <button
+              onClick={() => {
+                setSearchActive((prev) => !prev);
+                if (searchActive) setSearchQuery("");
+              }}
+              className="text-white/80 hover:text-white text-lg p-2"
+              aria-label={searchActive ? "Close search" : "Open search"}
+            >
+              {searchActive ? <FaTimes size={22} /> : <FaSearch size={22} />}
+            </button>
           </div>
-        </div>
 
-        {searchActive && (
-          <div className="mb-5">
+          {/* Search Input */}
+          {searchActive && (
+            <div className="mb-5">
+              <input
+                type="text"
+                placeholder="Search by name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-80 bg-white/10 border border-white/20 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+              />
+            </div>
+          )}
+
+          {/* Add Rider Form */}
+          <form
+            onSubmit={handleAddRider}
+            className="w-full p-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end bg-black/10 rounded-2xl mb-6"
+          >
             <input
+              ref={nameRef}
               type="text"
-              placeholder="Search by name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full sm:w-80 bg-white/10 border border-white/20 rounded-full px-4 py-2"
+              placeholder="Name"
+              className="bg-white/10 border border-white/20 rounded px-3 py-2 w-full sm:w-56"
+              required
             />
-          </div>
-        )}
+            <input
+              ref={emailRef}
+              type="email"
+              placeholder="Email"
+              className="bg-white/10 border border-white/20 rounded px-3 py-2 w-full sm:w-56"
+              required
+              pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+              title="Please enter a valid email address"
+            />
+            <input
+              ref={phoneRef}
+              type="tel"
+              placeholder="Phone (10 digits)"
+              className="bg-white/10 border border-white/20 rounded px-3 py-2 w-full sm:w-44"
+              required
+              pattern="^\d{10}$"
+              title="Please enter a 10-digit phone number"
+            />
+            <input
+              ref={addrRef}
+              type="text"
+              placeholder="Address"
+              className="bg-white/10 border border-white/20 rounded px-3 py-2 w-full sm:w-80"
+              required
+            />
+            <button
+              type="submit"
+              className="cheetah-gradient-btn w-full sm:w-auto px-5 py-2 font-semibold"
+            >
+              ➕ Add Rider
+            </button>
+          </form>
 
-        {loading ? <SkeletonTable columns={4} rows={6} /> : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full w-full">
-              <thead className="border-b border-white/20">
-                <tr>
-                  <th className="px-4 py-3 text-left">Name</th>
-                  <th className="px-4 py-3 text-left">Email</th>
-                  <th className="px-4 py-3 text-left">Phone</th>
-                  <th className="px-4 py-3 text-left">Address</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRiders.map((rider) => (
-                  <tr key={rider._id} className="border-b border-white/10">
-                    <td className="px-4 py-3">{rider.name}</td>
-                    <td className="px-4 py-3">{rider.email}</td>
-                    <td className="px-4 py-3">{rider.phone}</td>
-                    <td className="px-4 py-3">{rider.address}</td>
+          {/* Riders Table */}
+          {loading ? (
+            <SkeletonTable columns={4} rows={6} />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full w-full text-base">
+                <thead className="border-b border-white/20">
+                  <tr>
+                    <th className="px-4 py-3 text-left">Name</th>
+                    <th className="px-4 py-3 text-left">Email</th>
+                    <th className="px-4 py-3 text-left">Phone</th>
+                    <th className="px-4 py-3 text-left">Address</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {filteredRiders.length > 0 ? (
+                    filteredRiders.map((rider, idx) => (
+                      <tr
+                        key={rider._id}
+                        className="border-b border-white/10 animate-slide-up"
+                        style={{ animationDelay: `${idx * 70}ms` }}
+                      >
+                        <td className="px-4 py-3">{rider.name}</td>
+                        <td className="px-4 py-3">{rider.email}</td>
+                        <td className="px-4 py-3">{rider.phone}</td>
+                        <td className="px-4 py-3">{rider.address}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="text-center py-6 text-white/50">
+                        No riders found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </section>
-    </>
+    </ProtectedRoute>
   );
 }
