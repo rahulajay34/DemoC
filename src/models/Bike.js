@@ -3,93 +3,64 @@ import mongoose from "mongoose";
 const BikeSchema = new mongoose.Schema({
   make: { 
     type: String, 
-    required: [true, 'Make is required'],
-    trim: true,
-    maxlength: [50, 'Make cannot be more than 50 characters']
+    required: true,
+    trim: true
   },
   model: { 
     type: String, 
-    required: [true, 'Model is required'],
-    trim: true,
-    maxlength: [50, 'Model cannot be more than 50 characters']
+    required: true,
+    trim: true
   },
   number: { 
     type: String, 
-    required: [true, 'Bike number is required'],
-    unique: true,
+    required: true,
     trim: true,
-    uppercase: true,
-    match: [/^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$/, 'Please enter a valid bike number format']
+    uppercase: true
   },
   registrationNumber: {
     type: String,
-    required: [true, 'Registration number is required'],
-    unique: true,
+    required: true,
     trim: true,
     uppercase: true
   },
   chassisNumber: {
     type: String,
-    required: [true, 'Chassis number is required'],
-    unique: true,
+    required: true,
     trim: true,
     uppercase: true
   },
   engineNumber: {
     type: String,
-    required: [true, 'Engine number is required'],
-    unique: true,
+    required: true,
     trim: true,
     uppercase: true
   },
   year: {
     type: Number,
-    required: [true, 'Manufacturing year is required'],
-    min: [1990, 'Year cannot be less than 1990'],
-    max: [new Date().getFullYear() + 1, 'Year cannot be more than next year']
+    required: true
   },
   type: {
     type: String,
-    required: [true, 'Bike type is required'],
-    enum: {
-      values: ['scooter', 'motorcycle', 'electric', 'sports', 'cruiser', 'touring'],
-      message: '{VALUE} is not a valid bike type'
-    }
+    required: true
   },
   fuelType: {
     type: String,
-    required: [true, 'Fuel type is required'],
-    enum: {
-      values: ['petrol', 'diesel', 'electric', 'hybrid'],
-      message: '{VALUE} is not a valid fuel type'
-    }
+    required: true
   },
   engineCapacity: {
-    type: Number,
-    required: function() { 
-      return this.fuelType !== 'electric'; 
-    },
-    min: [50, 'Engine capacity cannot be less than 50cc']
+    type: Number
   },
   color: {
     type: String,
-    required: [true, 'Color is required'],
+    required: true,
     trim: true
   },
   status: { 
     type: String, 
-    enum: {
-      values: ['available', 'assigned', 'maintenance', 'retired', 'damaged'],
-      message: '{VALUE} is not a valid status'
-    },
     default: 'available' 
   },
   condition: {
     type: String,
-    enum: {
-      values: ['excellent', 'good', 'fair', 'poor'],
-      message: '{VALUE} is not a valid condition'
-    },
     default: 'good'
   },
   assignedTo: { 
@@ -100,33 +71,31 @@ const BikeSchema = new mongoose.Schema({
   assignedAt: { type: Date, default: null },
   purchaseDate: {
     type: Date,
-    required: [true, 'Purchase date is required']
+    required: true
   },
   purchasePrice: {
     type: Number,
-    required: [true, 'Purchase price is required'],
-    min: [0, 'Purchase price cannot be negative']
+    required: true
   },
   currentValue: {
-    type: Number,
-    min: [0, 'Current value cannot be negative']
+    type: Number
   },
   insurance: {
     provider: { type: String, trim: true },
     policyNumber: { type: String, trim: true },
     expiryDate: { type: Date },
-    premium: { type: Number, min: 0 }
+    premium: { type: Number }
   },
   maintenance: {
     lastServiceDate: { type: Date },
     nextServiceDate: { type: Date },
-    lastServiceKm: { type: Number, min: 0 },
-    nextServiceKm: { type: Number, min: 0 },
+    lastServiceKm: { type: Number },
+    nextServiceKm: { type: Number },
     serviceHistory: [{
       date: Date,
       type: String,
       description: String,
-      cost: { type: Number, min: 0 },
+      cost: { type: Number },
       serviceCenter: String
     }]
   },
@@ -137,8 +106,8 @@ const BikeSchema = new mongoose.Schema({
     fitness: { type: String, default: null }
   },
   mileage: {
-    current: { type: Number, default: 0, min: 0 },
-    average: { type: Number, default: 0, min: 0 }
+    current: { type: Number, default: 0 },
+    average: { type: Number, default: 0 }
   },
   features: {
     gps: { type: Boolean, default: false },
@@ -157,8 +126,6 @@ const BikeSchema = new mongoose.Schema({
   },
   rating: {
     type: Number,
-    min: [0, 'Rating cannot be less than 0'],
-    max: [5, 'Rating cannot be more than 5'],
     default: 0
   },
   totalAssignments: { type: Number, default: 0 },

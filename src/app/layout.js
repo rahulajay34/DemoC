@@ -1,6 +1,8 @@
 import "./globals.css";
+import { Providers } from './providers';
 import { AuthProvider } from "../context/AuthContext";
 import { ToastProvider } from "../context/ToastContext";
+import { ThemeProvider } from "../context/ThemeContext";
 import Toast from "../components/Toast";
 import MainLayout from "@/components/MainLayout";
 import FlairLines from "@/components/FlairLines"; // Import the new flair component
@@ -21,14 +23,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
-          <ToastProvider>
-            <AnimatedBackground />
-            <FlairLines /> {/* ✨ Add the new flair lines here ✨ */}
-            <MainLayout>{children}</MainLayout>
-            <Toast />
-          </ToastProvider>
-        </AuthProvider>
+        <Providers>
+          <ThemeProvider>
+            <AuthProvider>
+              <ToastProvider>
+                <AnimatedBackground />
+                <FlairLines /> {/* ✨ Add the new flair lines here ✨ */}
+                <MainLayout>{children}</MainLayout>
+                <Toast />
+              </ToastProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

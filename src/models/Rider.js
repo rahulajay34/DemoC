@@ -3,23 +3,19 @@ import mongoose from "mongoose";
 const RiderSchema = new mongoose.Schema({
   name: { 
     type: String, 
-    required: [true, 'Name is required'],
-    trim: true,
-    maxlength: [100, 'Name cannot be more than 100 characters']
+    required: true,
+    trim: true
   },
   email: { 
     type: String, 
-    required: [true, 'Email is required'],
-    unique: true,
+    required: true,
     trim: true,
-    lowercase: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+    lowercase: true
   },
   phone: { 
     type: String, 
-    required: [true, 'Phone number is required'],
-    trim: true,
-    match: [/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
+    required: true,
+    trim: true
   },
   address: {
     street: { type: String, trim: true },
@@ -30,31 +26,17 @@ const RiderSchema = new mongoose.Schema({
   },
   licenseNumber: {
     type: String,
-    required: [true, 'License number is required'],
-    unique: true,
+    required: true,
     trim: true,
     uppercase: true
   },
   licenseExpiry: {
     type: Date,
-    required: [true, 'License expiry date is required'],
-    validate: {
-      validator: function(v) {
-        return v > new Date();
-      },
-      message: 'License expiry date must be in the future'
-    }
+    required: true
   },
   dateOfBirth: {
     type: Date,
-    required: [true, 'Date of birth is required'],
-    validate: {
-      validator: function(v) {
-        const age = (new Date() - v) / (365.25 * 24 * 60 * 60 * 1000);
-        return age >= 18;
-      },
-      message: 'Rider must be at least 18 years old'
-    }
+    required: true
   },
   emergencyContact: {
     name: { type: String, trim: true },
@@ -63,16 +45,10 @@ const RiderSchema = new mongoose.Schema({
   },
   status: { 
     type: String, 
-    enum: {
-      values: ['active', 'inactive', 'suspended', 'pending'],
-      message: '{VALUE} is not a valid status'
-    },
     default: 'active' 
   },
   rating: {
     type: Number,
-    min: [0, 'Rating cannot be less than 0'],
-    max: [5, 'Rating cannot be more than 5'],
     default: 0
   },
   totalAssignments: { type: Number, default: 0 },

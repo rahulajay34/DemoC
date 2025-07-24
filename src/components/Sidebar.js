@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import {
   FaBars,
   FaUserFriends,
@@ -24,8 +25,16 @@ import { motion } from "framer-motion"; // Import framer-motion
 
 export default function Sidebar() {
   const { logout } = useAuth();
+  const { theme, getThemeClasses } = useTheme();
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const [sidebarStats, setSidebarStats] = useState({
+    activeRiders: 0,
+    availableBikes: 0,
+    pendingPayments: 0,
+    maintenanceDue: 0,
+    loading: true
+  });
 
   // Close sidebar when screen size changes to desktop
   useEffect(() => {
@@ -43,6 +52,33 @@ export default function Sidebar() {
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  // Fetch sidebar stats
+  useEffect(() => {
+    async function fetchSidebarStats() {
+      try {
+        const [riders, bikes, payments, maintenance] = await Promise.all([
+          fetch('/api/riders?status=active&limit=1').then(res => res.json()),
+          fetch('/api/bikes?status=available&limit=1').then(res => res.json()),
+          fetch('/api/payments?status=pending&limit=1').then(res => res.json()),
+          fetch('/api/maintenance?status=scheduled&limit=1').then(res => res.json())
+        ]);
+
+        setSidebarStats({
+          activeRiders: riders.pagination?.totalItems || 0,
+          availableBikes: bikes.pagination?.totalItems || 0,
+          pendingPayments: payments.pagination?.totalItems || 0,
+          maintenanceDue: maintenance.pagination?.totalItems || 0,
+          loading: false
+        });
+      } catch (error) {
+        console.error('Failed to fetch sidebar stats:', error);
+        setSidebarStats(prev => ({ ...prev, loading: false }));
+      }
+    }
+
+    fetchSidebarStats();
+  }, []);
 
   const navLinks = [
     { href: "/", icon: <FaHome size={20} />, label: "Dashboard" },
@@ -98,8 +134,12 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Top Bar - Only visible on mobile */}
-      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-gray-950/95 backdrop-blur-md text-white shadow-lg border-b border-gray-800/50 w-full">
-        <button aria-label="Open menu" onClick={() => setOpen(true)} className="p-2 hover:bg-gray-800/50 rounded-lg transition-colors">
+      <div className={`md:hidden flex items-center justify-between px-4 py-3 ${theme.colors.sidebarBg} ${theme.colors.textPrimary} shadow-lg border-b ${theme.colors.borderPrimary} w-full`}>
+        <button 
+          aria-label="Open menu" 
+          onClick={() => setOpen(true)} 
+          className={`p-2 ${getThemeClasses('hover:bg-slate-100', 'hover:bg-slate-800/50')} rounded-lg transition-colors`}
+        >
           <FaBars size={22} />
         </button>
         <CheetahLogo className="w-[118px] h-[30px] text-orange-400" />
@@ -107,7 +147,7 @@ export default function Sidebar() {
       </div>
 
       {/* Desktop Sidebar - Only visible on desktop */}
-      <nav className="hidden md:flex w-64 min-h-screen flex-col bg-gray-950/95 backdrop-blur-md text-white px-4 py-8 shadow-2xl overflow-y-auto border-r border-gray-800/50">
+      <nav className={`hidden md:flex w-64 min-h-screen flex-col ${theme.colors.sidebarBg} ${theme.colors.textPrimary} px-4 py-8 shadow-2xl overflow-y-auto border-r ${theme.colors.borderPrimary}`}>
         <div>
           <div className="mb-12 px-2">
             <CheetahLogo className="w-[158px] h-[40px] text-orange-400" />
@@ -121,8 +161,8 @@ export default function Sidebar() {
                   href={link.href}
                   className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${
                     isActive
-                      ? "text-white font-semibold"
-                      : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+                      ? `${theme.colors.textPrimary} font-semibold`
+                      : `${theme.colors.textSecondary} hover:${theme.colors.textPrimary} ${getThemeClasses('hover:bg-slate-100', 'hover:bg-gray-800/50')}`
                   }`}
                 >
                   {/* ✨ This is the animated sliding indicator ✨ */}
@@ -143,26 +183,34 @@ export default function Sidebar() {
         </div>
         
         {/* Quick Stats Section */}
-        <div className="mt-8 p-4 bg-gray-800/50 rounded-xl">
-          <h3 className="text-xs font-semibold text-gray-400 mb-3 uppercase tracking-wider">
+        <div className={`mt-8 p-4 ${theme.colors.cardBg} rounded-xl ${theme.colors.borderSecondary} border`}>
+          <h3 className={`text-xs font-semibold ${theme.colors.textSecondary} mb-3 uppercase tracking-wider`}>
             Quick Stats
           </h3>
           <div className="space-y-2 text-xs">
             <div className="flex justify-between items-center">
-              <span className="text-gray-300">Active Riders</span>
-              <span className="text-green-400 font-semibold">156</span>
+              <span className={theme.colors.textSecondary}>Active Riders</span>
+              <span className="text-green-400 font-semibold">
+                {sidebarStats.loading ? '...' : sidebarStats.activeRiders}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-300">Available Bikes</span>
-              <span className="text-blue-400 font-semibold">89</span>
+              <span className={theme.colors.textSecondary}>Available Bikes</span>
+              <span className="text-blue-400 font-semibold">
+                {sidebarStats.loading ? '...' : sidebarStats.availableBikes}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-300">Pending Payments</span>
-              <span className="text-yellow-400 font-semibold">12</span>
+              <span className={theme.colors.textSecondary}>Pending Payments</span>
+              <span className="text-yellow-400 font-semibold">
+                {sidebarStats.loading ? '...' : sidebarStats.pendingPayments}
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-300">Maintenance Due</span>
-              <span className="text-red-400 font-semibold">4</span>
+              <span className={theme.colors.textSecondary}>Maintenance Due</span>
+              <span className="text-red-400 font-semibold">
+                {sidebarStats.loading ? '...' : sidebarStats.maintenanceDue}
+              </span>
             </div>
           </div>
         </div>
@@ -173,14 +221,14 @@ export default function Sidebar() {
             <FaExclamationTriangle className="text-red-400" size={14} />
             <span className="text-xs font-semibold text-red-400">System Alerts</span>
           </div>
-          <p className="text-xs text-gray-300">
+          <p className={`text-xs ${theme.colors.textSecondary}`}>
             No critical alerts at this time
           </p>
         </div>
         
         <button
           onClick={logout}
-          className="mt-auto text-gray-400 font-semibold hover:text-white hover:underline w-full text-left pl-4 py-2"
+          className={`mt-auto ${theme.colors.textSecondary} font-semibold hover:${theme.colors.textPrimary} hover:underline w-full text-left pl-4 py-2`}
         >
           Logout
         </button>
@@ -196,9 +244,9 @@ export default function Sidebar() {
           />
           
           {/* Sidebar */}
-          <nav className="fixed inset-y-0 left-0 w-64 bg-gray-950/95 backdrop-blur-md text-white flex flex-col px-4 py-6 shadow-2xl overflow-y-auto border-r border-gray-800/50">
+          <nav className={`fixed inset-y-0 left-0 w-64 ${theme.colors.sidebarBg} ${theme.colors.textPrimary} flex flex-col px-4 py-6 shadow-2xl overflow-y-auto border-r ${theme.colors.borderPrimary}`}>
             <span
-              className="absolute top-3 right-5 cursor-pointer text-2xl text-gray-400 hover:text-white transition-colors"
+              className={`absolute top-3 right-5 cursor-pointer text-2xl ${theme.colors.textSecondary} hover:${theme.colors.textPrimary} transition-colors`}
               onClick={() => setOpen(false)}
             >
               &times;
@@ -217,8 +265,8 @@ export default function Sidebar() {
                       onClick={() => setOpen(false)}
                       className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${
                         isActive
-                          ? "text-white font-semibold"
-                          : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+                          ? `${theme.colors.textPrimary} font-semibold`
+                          : `${theme.colors.textSecondary} hover:${theme.colors.textPrimary} ${getThemeClasses('hover:bg-slate-100', 'hover:bg-gray-800/50')}`
                       }`}
                     >
                       {/* ✨ This is the animated sliding indicator ✨ */}
@@ -239,26 +287,34 @@ export default function Sidebar() {
             </div>
             
             {/* Quick Stats Section */}
-            <div className="mt-8 p-4 bg-gray-800/50 rounded-xl">
-              <h3 className="text-xs font-semibold text-gray-400 mb-3 uppercase tracking-wider">
+            <div className={`mt-8 p-4 ${theme.colors.cardBg} rounded-xl ${theme.colors.borderSecondary} border`}>
+              <h3 className={`text-xs font-semibold ${theme.colors.textSecondary} mb-3 uppercase tracking-wider`}>
                 Quick Stats
               </h3>
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Active Riders</span>
-                  <span className="text-green-400 font-semibold">156</span>
+                  <span className={theme.colors.textSecondary}>Active Riders</span>
+                  <span className="text-green-400 font-semibold">
+                    {sidebarStats.loading ? '...' : sidebarStats.activeRiders}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Available Bikes</span>
-                  <span className="text-blue-400 font-semibold">89</span>
+                  <span className={theme.colors.textSecondary}>Available Bikes</span>
+                  <span className="text-blue-400 font-semibold">
+                    {sidebarStats.loading ? '...' : sidebarStats.availableBikes}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Pending Payments</span>
-                  <span className="text-yellow-400 font-semibold">12</span>
+                  <span className={theme.colors.textSecondary}>Pending Payments</span>
+                  <span className="text-yellow-400 font-semibold">
+                    {sidebarStats.loading ? '...' : sidebarStats.pendingPayments}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Maintenance Due</span>
-                  <span className="text-red-400 font-semibold">4</span>
+                  <span className={theme.colors.textSecondary}>Maintenance Due</span>
+                  <span className="text-red-400 font-semibold">
+                    {sidebarStats.loading ? '...' : sidebarStats.maintenanceDue}
+                  </span>
                 </div>
               </div>
             </div>

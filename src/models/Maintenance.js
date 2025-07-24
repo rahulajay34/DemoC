@@ -4,7 +4,6 @@ const MaintenanceSchema = new mongoose.Schema({
   maintenanceId: {
     type: String,
     required: true,
-    unique: true,
     default: function() {
       return 'MNT' + Date.now().toString(36).toUpperCase();
     }
@@ -12,66 +11,46 @@ const MaintenanceSchema = new mongoose.Schema({
   bike: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Bike",
-    required: [true, 'Bike is required']
+    required: true
   },
   type: {
     type: String,
-    required: [true, 'Maintenance type is required'],
-    enum: {
-      values: ['routine', 'repair', 'inspection', 'emergency', 'recall', 'upgrade'],
-      message: '{VALUE} is not a valid maintenance type'
-    }
+    required: true
   },
   category: {
     type: String,
-    required: [true, 'Maintenance category is required'],
-    enum: {
-      values: ['engine', 'transmission', 'brakes', 'electrical', 'body', 'tires', 'battery', 'other'],
-      message: '{VALUE} is not a valid maintenance category'
-    }
+    required: true
   },
   priority: {
     type: String,
-    enum: {
-      values: ['low', 'medium', 'high', 'critical'],
-      message: '{VALUE} is not a valid priority'
-    },
     default: 'medium'
   },
   status: {
     type: String,
-    enum: {
-      values: ['scheduled', 'in_progress', 'completed', 'cancelled', 'on_hold'],
-      message: '{VALUE} is not a valid status'
-    },
     default: 'scheduled'
   },
   description: {
     type: String,
-    required: [true, 'Description is required'],
-    trim: true,
-    maxlength: [500, 'Description cannot exceed 500 characters']
+    required: true,
+    trim: true
   },
   scheduledDate: {
     type: Date,
-    required: [true, 'Scheduled date is required']
+    required: true
   },
   completedDate: Date,
   estimatedDuration: {
-    type: Number, // in hours
-    min: [0.5, 'Estimated duration must be at least 0.5 hours'],
-    max: [168, 'Estimated duration cannot exceed 168 hours (1 week)']
+    type: Number // in hours
   },
   actualDuration: {
-    type: Number, // in hours
-    min: [0, 'Actual duration cannot be negative']
+    type: Number // in hours
   },
   serviceCenter: {
     name: { type: String, trim: true },
     address: { type: String, trim: true },
     phone: { type: String, trim: true },
     email: { type: String, trim: true },
-    rating: { type: Number, min: 0, max: 5 }
+    rating: { type: Number }
   },
   assignedTechnician: {
     name: { type: String, trim: true },
@@ -80,24 +59,24 @@ const MaintenanceSchema = new mongoose.Schema({
     specialization: { type: String, trim: true }
   },
   cost: {
-    labor: { type: Number, default: 0, min: 0 },
-    parts: { type: Number, default: 0, min: 0 },
-    other: { type: Number, default: 0, min: 0 },
-    total: { type: Number, default: 0, min: 0 }
+    labor: { type: Number, default: 0 },
+    parts: { type: Number, default: 0 },
+    other: { type: Number, default: 0 },
+    total: { type: Number, default: 0 }
   },
   parts: [{
     name: { type: String, required: true, trim: true },
     partNumber: { type: String, trim: true },
-    quantity: { type: Number, required: true, min: 1 },
-    unitPrice: { type: Number, required: true, min: 0 },
-    totalPrice: { type: Number, required: true, min: 0 },
+    quantity: { type: Number, required: true },
+    unitPrice: { type: Number, required: true },
+    totalPrice: { type: Number, required: true },
     supplier: { type: String, trim: true },
     warranty: { type: String, trim: true } // warranty period
   }],
   workPerformed: [{
     task: { type: String, required: true, trim: true },
     description: { type: String, trim: true },
-    timeSpent: { type: Number, min: 0 }, // in hours
+    timeSpent: { type: Number }, // in hours
     technicianNotes: { type: String, trim: true }
   }],
   beforeImages: [String],
@@ -109,8 +88,7 @@ const MaintenanceSchema = new mongoose.Schema({
     report: String
   },
   mileageAtService: {
-    type: Number,
-    min: [0, 'Mileage cannot be negative']
+    type: Number
   },
   nextServiceDue: {
     date: Date,
@@ -127,7 +105,7 @@ const MaintenanceSchema = new mongoose.Schema({
     checked: { type: Boolean, default: false },
     checkedBy: String,
     checkedDate: Date,
-    rating: { type: Number, min: 0, max: 5 },
+    rating: { type: Number },
     issues: [String],
     approved: { type: Boolean, default: false }
   },

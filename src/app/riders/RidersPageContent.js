@@ -105,20 +105,16 @@ export default function RidersPageContent({ initialRiders }) {
           <input
             ref={emailRef}
             type="email"
-            placeholder="Email"
+            placeholder="Email *"
             className="bg-white/10 border border-white/20 rounded px-3 py-2 w-full sm:w-56"
             required
-            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-            title="Please enter a valid email address"
           />
           <input
             ref={phoneRef}
             type="tel"
-            placeholder="Phone (10 digits)"
+            placeholder="Phone *"
             className="bg-white/10 border border-white/20 rounded px-3 py-2 w-full sm:w-44"
             required
-            pattern="^\d{10}$"
-            title="Please enter a 10-digit phone number"
           />
           <input
             ref={addrRef}

@@ -10,23 +10,30 @@ import {
   FaUsers,
   FaBicycle,
   FaCreditCard,
-  FaWrench
+  FaWrench,
+  FaChartLine,
+  FaPieChart
 } from "react-icons/fa";
+import { useToast } from "@/context/ToastContext";
+import SkeletonTable from "@/components/SkeletonTable";
 
 export default function AnalyticsPage() {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('monthly');
   const [dateRange, setDateRange] = useState({
-    startDate: '',
-    endDate: ''
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0]
   });
+
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchAnalytics();
   }, [period, dateRange]);
 
   const fetchAnalytics = async () => {
+    setLoading(true);
     try {
       const params = new URLSearchParams();
       params.append('period', period);
@@ -35,80 +42,108 @@ export default function AnalyticsPage() {
       
       const response = await fetch(`/api/analytics?${params}`);
       const data = await response.json();
-      setAnalyticsData(data.analytics || []);
+      
+      if (response.ok) {
+        setAnalyticsData(data);
+      } else {
+        toast.error("❌ Failed to load analytics data");
+      }
     } catch (error) {
       console.error("Error fetching analytics:", error);
+      toast.error("❌ Failed to fetch analytics");
     } finally {
       setLoading(false);
     }
   };
 
-  const kpiCards = [
-    {
-      title: "Total Revenue",
-      value: "₹2,45,000",
-      change: "+12.5%",
-      trend: "up",
-      icon: <FaCreditCard className="text-green-500" size={24} />,
-      color: "from-green-500/20 to-green-600/20"
-    },
-    {
-      title: "Active Riders",
-      value: "156",
-      change: "+8.2%",
-      trend: "up",
-      icon: <FaUsers className="text-blue-500" size={24} />,
-      color: "from-blue-500/20 to-blue-600/20"
-    },
-    {
-      title: "Fleet Utilization",
-      value: "78.5%",
-      change: "-2.1%",
-      trend: "down",
-      icon: <FaBicycle className="text-purple-500" size={24} />,
-      color: "from-purple-500/20 to-purple-600/20"
-    },
-    {
-      title: "Maintenance Cost",
-      value: "₹45,600",
-      change: "+15.3%",
-      trend: "up",
-      icon: <FaWrench className="text-orange-500" size={24} />,
-      color: "from-orange-500/20 to-orange-600/20"
+  const exportReport = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.append('period', period);
+      params.append('format', 'csv');
+      if (dateRange.startDate) params.append('startDate', dateRange.startDate);
+      if (dateRange.endDate) params.append('endDate', dateRange.endDate);
+      
+      const response = await fetch(`/api/analytics/export?${params}`);
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `analytics-report-${period}-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        toast.success("📊 Report exported successfully!");
+      } else {
+        toast.error("❌ Failed to export report");
+      }
+    } catch (error) {
+      console.error("Error exporting report:", error);
+      toast.error("❌ Export failed");
     }
-  ];
+  };
 
-  const chartData = {
-    revenue: [
-      { month: 'Jan', value: 185000 },
-      { month: 'Feb', value: 192000 },
-      { month: 'Mar', value: 201000 },
-      { month: 'Apr', value: 218000 },
-      { month: 'May', value: 235000 },
-      { month: 'Jun', value: 245000 }
-    ],
-    assignments: [
-      { month: 'Jan', value: 45 },
-      { month: 'Feb', value: 52 },
-      { month: 'Mar', value: 48 },
-      { month: 'Apr', value: 61 },
-      { month: 'May', value: 55 },
-      { month: 'Jun', value: 67 }
-    ]
+  const getKPICards = () => {
+    if (!analyticsData) return [];
+    
+    return [
+      {
+        title: "Total Revenue",
+        value: `₹${(analyticsData.totalRevenue || 0).toLocaleString()}`,
+        change: `${analyticsData.revenueGrowth > 0 ? '+' : ''}${(analyticsData.revenueGrowth || 0).toFixed(1)}%`,
+        trend: analyticsData.revenueGrowth >= 0 ? 'up' : 'down',
+        icon: <FaCreditCard className="text-green-400" size={20} />,
+        color: "green"
+      },
+      {
+        title: "Active Riders",
+        value: analyticsData.activeRiders || 0,
+        change: `${analyticsData.riderGrowth > 0 ? '+' : ''}${(analyticsData.riderGrowth || 0).toFixed(1)}%`,
+        trend: analyticsData.riderGrowth >= 0 ? 'up' : 'down',
+        icon: <FaUsers className="text-blue-400" size={20} />,
+        color: "blue"
+      },
+      {
+        title: "Fleet Utilization",
+        value: `${(analyticsData.utilizationRate || 0).toFixed(1)}%`,
+        change: `${analyticsData.utilizationGrowth > 0 ? '+' : ''}${(analyticsData.utilizationGrowth || 0).toFixed(1)}%`,
+        trend: analyticsData.utilizationGrowth >= 0 ? 'up' : 'down',
+        icon: <FaBicycle className="text-purple-400" size={20} />,
+        color: "purple"
+      },
+      {
+        title: "Avg Revenue/Rider",
+        value: `₹${(analyticsData.avgRevenuePerRider || 0).toLocaleString()}`,
+        change: `${analyticsData.revenuePerRiderGrowth > 0 ? '+' : ''}${(analyticsData.revenuePerRiderGrowth || 0).toFixed(1)}%`,
+        trend: analyticsData.revenuePerRiderGrowth >= 0 ? 'up' : 'down',
+        icon: <FaChartLine className="text-orange-400" size={20} />,
+        color: "orange"
+      }
+    ];
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6 space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <FaChartBar className="text-blue-500" />
-            Analytics & Reports
+          <h1 className="text-3xl font-bold text-white flex items-center">
+            <FaChartBar className="mr-3 text-blue-400" />
+            Analytics Dashboard
           </h1>
           <p className="text-gray-400 mt-1">Comprehensive insights into your fleet performance</p>
         </div>
-        <div className="flex items-center gap-4">
+        
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Period Selector */}
           <select 
             value={period} 
             onChange={(e) => setPeriod(e.target.value)}
@@ -117,175 +152,234 @@ export default function AnalyticsPage() {
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
             <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
             <option value="yearly">Yearly</option>
           </select>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors"
+
+          {/* Date Range */}
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={dateRange.startDate}
+              onChange={(e) => setDateRange(prev => ({...prev, startDate: e.target.value}))}
+              className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-600 text-sm"
+            />
+            <input
+              type="date"
+              value={dateRange.endDate}
+              onChange={(e) => setDateRange(prev => ({...prev, endDate: e.target.value}))}
+              className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-600 text-sm"
+            />
+          </div>
+
+          {/* Export Button */}
+          <button
+            onClick={exportReport}
+            className="cheetah-gradient-btn px-4 py-2 font-semibold flex items-center"
           >
-            <FaDownload /> Export Report
-          </motion.button>
+            <FaDownload className="mr-2" size={14} />
+            Export
+          </button>
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {kpiCards.map((kpi, index) => (
-          <motion.div
-            key={kpi.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className={`bg-gradient-to-br ${kpi.color} p-6 rounded-2xl border border-gray-700/50 backdrop-blur-sm`}
-          >
-            <div className="flex justify-between items-start mb-4">
-              {kpi.icon}
-              <div className="flex items-center gap-1">
-                {kpi.trend === "up" ? (
-                  <FaArrowUp className="text-green-400" size={14} />
-                ) : (
-                  <FaArrowDown className="text-red-400" size={14} />
-                )}
-                <span className={`text-sm font-medium ${
-                  kpi.trend === "up" ? "text-green-400" : "text-red-400"
-                }`}>
-                  {kpi.change}
-                </span>
+      {loading ? (
+        <SkeletonTable columns={4} rows={8} />
+      ) : (
+        <>
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {getKPICards().map((card, index) => (
+              <motion.div
+                key={card.title}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: index * 0.1 }}
+                className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  {card.icon}
+                  <div className={`flex items-center gap-1 text-sm ${
+                    card.trend === 'up' ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {card.trend === 'up' ? <FaArrowUp size={12} /> : <FaArrowDown size={12} />}
+                    {card.change}
+                  </div>
+                </div>
+                <h3 className="text-gray-400 text-sm mb-1">{card.title}</h3>
+                <p className="text-2xl font-bold text-white">{card.value}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Revenue Trend */}
+            <motion.div
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.5 }}
+              className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-white">Revenue Trend</h3>
+                <FaChartLine className="text-green-400" size={20} />
               </div>
-            </div>
-            <div>
-              <p className="text-gray-400 text-sm">{kpi.title}</p>
-              <p className="text-2xl font-bold text-white">{kpi.value}</p>
+              <div className="h-64 flex items-center justify-center">
+                {analyticsData?.revenueByPeriod?.length > 0 ? (
+                  <div className="w-full">
+                    <div className="grid grid-cols-7 gap-2 h-48">
+                      {analyticsData.revenueByPeriod.slice(-7).map((data, index) => (
+                        <div key={index} className="flex flex-col items-center">
+                          <div 
+                            className="w-full bg-gradient-to-t from-green-600 to-green-400 rounded-t"
+                            style={{ 
+                              height: `${Math.max((data.revenue / Math.max(...analyticsData.revenueByPeriod.map(d => d.revenue))) * 100, 5)}%`
+                            }}
+                          />
+                          <span className="text-xs text-gray-400 mt-2">
+                            {new Date(data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-400">No revenue data available for selected period</p>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Top Performers */}
+            <motion.div
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.6 }}
+              className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-white">Top Performing Riders</h3>
+                <FaUsers className="text-blue-400" size={20} />
+              </div>
+              <div className="space-y-4">
+                {analyticsData?.topRiders?.slice(0, 5).map((rider, index) => (
+                  <div key={rider._id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-xs font-bold">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="text-white text-sm font-medium">{rider.name}</p>
+                        <p className="text-gray-400 text-xs">{rider.email}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-green-400 text-sm font-medium">₹{(rider.totalRevenue || 0).toLocaleString()}</p>
+                      <p className="text-gray-400 text-xs">{rider.totalAssignments || 0} rides</p>
+                    </div>
+                  </div>
+                )) || (
+                  <p className="text-gray-400 text-center">No rider data available</p>
+                )}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Detailed Analytics */}
+          <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.7 }}
+            className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
+          >
+            <h3 className="text-lg font-semibold text-white mb-6">Fleet Performance Metrics</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="text-center">
+                <h4 className="text-gray-400 text-sm mb-2">Average Trip Duration</h4>
+                <p className="text-2xl font-bold text-white">{analyticsData?.avgTripDuration || 0} hrs</p>
+              </div>
+              <div className="text-center">
+                <h4 className="text-gray-400 text-sm mb-2">Total Distance Covered</h4>
+                <p className="text-2xl font-bold text-white">{(analyticsData?.totalDistance || 0).toLocaleString()} km</p>
+              </div>
+              <div className="text-center">
+                <h4 className="text-gray-400 text-sm mb-2">Maintenance Cost</h4>
+                <p className="text-2xl font-bold text-white">₹{(analyticsData?.maintenanceCost || 0).toLocaleString()}</p>
+              </div>
+              <div className="text-center">
+                <h4 className="text-gray-400 text-sm mb-2">Customer Satisfaction</h4>
+                <p className="text-2xl font-bold text-white">{(analyticsData?.avgRating || 0).toFixed(1)}/5.0</p>
+              </div>
             </div>
           </motion.div>
-        ))}
-      </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Revenue Chart */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
-        >
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-semibold text-white">Revenue Trends</h3>
-            <FaCalendarAlt className="text-green-400" />
-          </div>
-          <div className="h-64 flex items-end justify-between gap-2">
-            {chartData.revenue.map((item, index) => (
-              <div key={item.month} className="flex-1 flex flex-col items-center">
-                <div 
-                  className="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg transition-all duration-700 ease-out"
-                  style={{ 
-                    height: `${(item.value / Math.max(...chartData.revenue.map(d => d.value))) * 200}px` 
-                  }}
-                />
-                <p className="text-gray-400 text-xs mt-2">{item.month}</p>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Assignments Chart */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
-        >
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-semibold text-white">New Assignments</h3>
-            <FaUsers className="text-blue-400" />
-          </div>
-          <div className="h-64 flex items-end justify-between gap-2">
-            {chartData.assignments.map((item, index) => (
-              <div key={item.month} className="flex-1 flex flex-col items-center">
-                <div 
-                  className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg transition-all duration-700 ease-out"
-                  style={{ 
-                    height: `${(item.value / Math.max(...chartData.assignments.map(d => d.value))) * 200}px` 
-                  }}
-                />
-                <p className="text-gray-400 text-xs mt-2">{item.month}</p>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Detailed Analytics Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Performing Bikes */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
-        >
-          <h3 className="text-xl font-semibold text-white mb-6">Top Performing Bikes</h3>
-          <div className="space-y-4">
-            {[
-              { bike: "Honda Activa 125", utilization: "95%", revenue: "₹15,600" },
-              { bike: "TVS Jupiter", utilization: "92%", revenue: "₹14,800" },
-              { bike: "Hero Maestro", utilization: "88%", revenue: "₹13,200" },
-              { bike: "Suzuki Access", utilization: "85%", revenue: "₹12,900" },
-              { bike: "Yamaha Ray ZR", utilization: "82%", revenue: "₹11,500" }
-            ].map((bike, index) => (
-              <div key={bike.bike} className="flex justify-between items-center p-3 bg-gray-800/50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-xs font-bold">
-                    {index + 1}
+          {/* Recent Analytics Summary */}
+          <motion.div
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: 0.8 }}
+            className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
+          >
+            <h3 className="text-lg font-semibold text-white mb-6">Period Summary</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <h4 className="text-gray-400 text-sm mb-3">Revenue Breakdown</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Monthly Rent</span>
+                    <span className="text-green-400">₹{(analyticsData?.revenueBreakdown?.monthlyRent || 0).toLocaleString()}</span>
                   </div>
-                  <div>
-                    <p className="text-white font-medium">{bike.bike}</p>
-                    <p className="text-gray-400 text-sm">{bike.utilization} utilization</p>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Deposits</span>
+                    <span className="text-blue-400">₹{(analyticsData?.revenueBreakdown?.deposits || 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Late Fees</span>
+                    <span className="text-orange-400">₹{(analyticsData?.revenueBreakdown?.lateFees || 0).toLocaleString()}</span>
                   </div>
                 </div>
-                <p className="text-green-400 font-semibold">{bike.revenue}</p>
               </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Payment Methods Distribution */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
-        >
-          <h3 className="text-xl font-semibold text-white mb-6">Payment Methods</h3>
-          <div className="space-y-4">
-            {[
-              { method: "UPI", percentage: 45, amount: "₹1,10,250" },
-              { method: "Bank Transfer", percentage: 30, amount: "₹73,500" },
-              { method: "Cash", percentage: 15, amount: "₹36,750" },
-              { method: "Card", percentage: 8, amount: "₹19,600" },
-              { method: "Cheque", percentage: 2, amount: "₹4,900" }
-            ].map((method, index) => (
-              <div key={method.method} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-white font-medium">{method.method}</span>
-                  <div className="text-right">
-                    <p className="text-white">{method.percentage}%</p>
-                    <p className="text-gray-400 text-sm">{method.amount}</p>
+              
+              <div>
+                <h4 className="text-gray-400 text-sm mb-3">Bike Categories</h4>
+                <div className="space-y-2">
+                  {analyticsData?.bikeCategories?.map((category) => (
+                    <div key={category.category} className="flex justify-between">
+                      <span className="text-gray-300 capitalize">{category.category}</span>
+                      <span className="text-blue-400">{category.count} bikes</span>
+                    </div>
+                  )) || (
+                    <p className="text-gray-500 text-sm">No category data</p>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-gray-400 text-sm mb-3">Payment Status</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Paid</span>
+                    <span className="text-green-400">{analyticsData?.paymentStatus?.paid || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Pending</span>
+                    <span className="text-yellow-400">{analyticsData?.paymentStatus?.pending || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Overdue</span>
+                    <span className="text-red-400">{analyticsData?.paymentStatus?.overdue || 0}</span>
                   </div>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-700 ease-out"
-                    style={{ width: `${method.percentage}%` }}
-                  />
-                </div>
               </div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
+            </div>
+          </motion.div>
+        </>
+      )}
     </div>
   );
 }

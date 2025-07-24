@@ -16,18 +16,36 @@ import {
   FaUpload,
   FaSave,
   FaCheck,
-  FaTimes
+  FaTimes,
+  FaEdit,
+  FaLock,
+  FaGlobe,
+  FaChartBar,
+  FaBicycle
 } from "react-icons/fa";
+import { useToast } from "@/context/ToastContext";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
+  const [saving, setSaving] = useState(false);
+  const { currentTheme, changeTheme, themes } = useTheme();
   const [settings, setSettings] = useState({
     general: {
       companyName: "CheetahRide",
       timezone: "Asia/Kolkata",
       dateFormat: "DD/MM/YYYY",
       currency: "INR",
-      language: "en"
+      language: "en",
+      theme: currentTheme
+    },
+    fleet: {
+      defaultRentalDuration: 30,
+      securityDepositAmount: 5000,
+      latePaymentFee: 100,
+      maintenanceInterval: 30,
+      autoAssignment: true,
+      allowMultipleBookings: false
     },
     notifications: {
       emailNotifications: true,
@@ -35,67 +53,61 @@ export default function SettingsPage() {
       pushNotifications: true,
       maintenanceAlerts: true,
       paymentReminders: true,
-      overdueAlerts: true
+      overdueAlerts: true,
+      systemUpdates: true,
+      marketingEmails: false
     },
     security: {
       twoFactorAuth: false,
       sessionTimeout: 60,
       passwordExpiry: 90,
       maxLoginAttempts: 5,
-      requirePasswordChange: true
+      requirePasswordChange: true,
+      ipWhitelist: "",
+      encryptData: true
     },
     system: {
       backupFrequency: "daily",
       dataRetention: 365,
       logLevel: "info",
       maintenanceMode: false,
-      autoUpdates: true
+      debugMode: false,
+      apiRateLimit: 1000,
+      maxFileSize: 10
     },
-    appearance: {
-      theme: "dark",
-      accentColor: "#3B82F6",
-      compactMode: false,
-      showAnimations: true,
-      sidebarCollapsed: false
+    integrations: {
+      googleMaps: true,
+      smsGateway: "twilio",
+      paymentGateway: "razorpay",
+      emailService: "sendgrid",
+      analyticsTracking: true,
+      cloudStorage: "aws"
     }
   });
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+
+  const { toast } = useToast();
+
+  // Sync settings with current theme
+  useEffect(() => {
+    setSettings(prev => ({
+      ...prev,
+      general: {
+        ...prev.general,
+        theme: currentTheme
+      }
+    }));
+  }, [currentTheme]);
 
   const tabs = [
-    {
-      id: "general",
-      label: "General",
-      icon: <FaCog className="text-blue-500" />,
-      color: "from-blue-500/20 to-blue-600/20"
-    },
-    {
-      id: "notifications",
-      label: "Notifications",
-      icon: <FaBell className="text-yellow-500" />,
-      color: "from-yellow-500/20 to-yellow-600/20"
-    },
-    {
-      id: "security",
-      label: "Security",
-      icon: <FaShieldAlt className="text-green-500" />,
-      color: "from-green-500/20 to-green-600/20"
-    },
-    {
-      id: "system",
-      label: "System",
-      icon: <FaDatabase className="text-purple-500" />,
-      color: "from-purple-500/20 to-purple-600/20"
-    },
-    {
-      id: "appearance",
-      label: "Appearance",
-      icon: <FaPalette className="text-pink-500" />,
-      color: "from-pink-500/20 to-pink-600/20"
-    }
+    { id: "general", label: "General", icon: <FaCog /> },
+    { id: "fleet", label: "Fleet Management", icon: <FaBicycle /> },
+    { id: "notifications", label: "Notifications", icon: <FaBell /> },
+    { id: "security", label: "Security", icon: <FaShieldAlt /> },
+    { id: "system", label: "System", icon: <FaDatabase /> },
+    { id: "integrations", label: "Integrations", icon: <FaCloud /> }
   ];
 
-  const updateSetting = (category, key, value) => {
+  const handleSettingChange = (category, key, value) => {
     setSettings(prev => ({
       ...prev,
       [category]: {
@@ -103,19 +115,126 @@ export default function SettingsPage() {
         [key]: value
       }
     }));
+    
+    // Handle theme change immediately
+    if (category === 'general' && key === 'theme') {
+      changeTheme(value);
+    }
   };
 
-  const saveSettings = async () => {
+  const handleSaveSettings = async () => {
     setSaving(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      // Simulate API call to save settings
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // In a real app, this would be:
+      // const response = await fetch('/api/settings', {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(settings)
+      // });
+      
+      toast.success("⚙️ Settings saved successfully!");
     } catch (error) {
       console.error("Error saving settings:", error);
+      toast.error("❌ Failed to save settings");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleExportSettings = () => {
+    const dataStr = JSON.stringify(settings, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `cheetahride-settings-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast.success("📁 Settings exported successfully!");
+  };
+
+  const handleImportSettings = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedSettings = JSON.parse(e.target.result);
+        setSettings(importedSettings);
+        toast.success("📤 Settings imported successfully!");
+      } catch (error) {
+        toast.error("❌ Invalid settings file");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const resetToDefaults = () => {
+    if (confirm("Are you sure you want to reset all settings to defaults? This action cannot be undone.")) {
+      // Reset to default values
+      setSettings({
+        general: {
+          companyName: "CheetahRide",
+          timezone: "Asia/Kolkata",
+          dateFormat: "DD/MM/YYYY",
+          currency: "INR",
+          language: "en",
+          theme: "dark"
+        },
+        fleet: {
+          defaultRentalDuration: 30,
+          securityDepositAmount: 5000,
+          latePaymentFee: 100,
+          maintenanceInterval: 30,
+          autoAssignment: true,
+          allowMultipleBookings: false
+        },
+        notifications: {
+          emailNotifications: true,
+          smsNotifications: true,
+          pushNotifications: true,
+          maintenanceAlerts: true,
+          paymentReminders: true,
+          overdueAlerts: true,
+          systemUpdates: true,
+          marketingEmails: false
+        },
+        security: {
+          twoFactorAuth: false,
+          sessionTimeout: 60,
+          passwordExpiry: 90,
+          maxLoginAttempts: 5,
+          requirePasswordChange: true,
+          ipWhitelist: "",
+          encryptData: true
+        },
+        system: {
+          backupFrequency: "daily",
+          dataRetention: 365,
+          logLevel: "info",
+          maintenanceMode: false,
+          debugMode: false,
+          apiRateLimit: 1000,
+          maxFileSize: 10
+        },
+        integrations: {
+          googleMaps: true,
+          smsGateway: "twilio",
+          paymentGateway: "razorpay",
+          emailService: "sendgrid",
+          analyticsTracking: true,
+          cloudStorage: "aws"
+        }
+      });
+      toast.success("🔄 Settings reset to defaults");
     }
   };
 
@@ -123,45 +242,48 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-white font-medium mb-2">Company Name</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Company Name</label>
           <input
             type="text"
             value={settings.general.companyName}
-            onChange={(e) => updateSetting("general", "companyName", e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            onChange={(e) => handleSettingChange('general', 'companyName', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           />
         </div>
+        
         <div>
-          <label className="block text-white font-medium mb-2">Timezone</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Timezone</label>
           <select
             value={settings.general.timezone}
-            onChange={(e) => updateSetting("general", "timezone", e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            onChange={(e) => handleSettingChange('general', 'timezone', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           >
             <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
-            <option value="UTC">UTC</option>
             <option value="America/New_York">America/New_York (EST)</option>
             <option value="Europe/London">Europe/London (GMT)</option>
+            <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
           </select>
         </div>
+
         <div>
-          <label className="block text-white font-medium mb-2">Date Format</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Date Format</label>
           <select
             value={settings.general.dateFormat}
-            onChange={(e) => updateSetting("general", "dateFormat", e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            onChange={(e) => handleSettingChange('general', 'dateFormat', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           >
             <option value="DD/MM/YYYY">DD/MM/YYYY</option>
             <option value="MM/DD/YYYY">MM/DD/YYYY</option>
             <option value="YYYY-MM-DD">YYYY-MM-DD</option>
           </select>
         </div>
+
         <div>
-          <label className="block text-white font-medium mb-2">Currency</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Currency</label>
           <select
             value={settings.general.currency}
-            onChange={(e) => updateSetting("general", "currency", e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            onChange={(e) => handleSettingChange('general', 'currency', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           >
             <option value="INR">INR (₹)</option>
             <option value="USD">USD ($)</option>
@@ -169,42 +291,135 @@ export default function SettingsPage() {
             <option value="GBP">GBP (£)</option>
           </select>
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Language</label>
+          <select
+            value={settings.general.language}
+            onChange={(e) => handleSettingChange('general', 'language', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          >
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-3">Theme</label>
+          <div className="grid grid-cols-3 gap-3">
+            {Object.entries({
+              dark: { label: "Dark", icon: "🌙", desc: "Dark mode" },
+              light: { label: "Light", icon: "☀️", desc: "Light mode" },
+              auto: { label: "Auto", icon: "🔄", desc: "System preference" }
+            }).map(([themeKey, themeInfo]) => (
+              <button
+                key={themeKey}
+                onClick={() => handleSettingChange('general', 'theme', themeKey)}
+                className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                  settings.general.theme === themeKey
+                    ? 'border-orange-500 bg-orange-500/20 text-orange-400'
+                    : 'border-white/20 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white'
+                }`}
+              >
+                <div className="text-2xl mb-2">{themeInfo.icon}</div>
+                <div className="font-medium text-sm">{themeInfo.label}</div>
+                <div className="text-xs opacity-70 mt-1">{themeInfo.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderFleetSettings = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Default Rental Duration (days)</label>
+          <input
+            type="number"
+            min="1"
+            value={settings.fleet.defaultRentalDuration}
+            onChange={(e) => handleSettingChange('fleet', 'defaultRentalDuration', parseInt(e.target.value))}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Security Deposit Amount (₹)</label>
+          <input
+            type="number"
+            min="0"
+            value={settings.fleet.securityDepositAmount}
+            onChange={(e) => handleSettingChange('fleet', 'securityDepositAmount', parseInt(e.target.value))}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Late Payment Fee (₹)</label>
+          <input
+            type="number"
+            min="0"
+            value={settings.fleet.latePaymentFee}
+            onChange={(e) => handleSettingChange('fleet', 'latePaymentFee', parseInt(e.target.value))}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Maintenance Interval (days)</label>
+          <input
+            type="number"
+            min="1"
+            value={settings.fleet.maintenanceInterval}
+            onChange={(e) => handleSettingChange('fleet', 'maintenanceInterval', parseInt(e.target.value))}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={settings.fleet.autoAssignment}
+            onChange={(e) => handleSettingChange('fleet', 'autoAssignment', e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-white">Enable Auto Assignment</span>
+        </label>
+
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={settings.fleet.allowMultipleBookings}
+            onChange={(e) => handleSettingChange('fleet', 'allowMultipleBookings', e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-white">Allow Multiple Bookings per Rider</span>
+        </label>
       </div>
     </div>
   );
 
   const renderNotificationSettings = () => (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <h3 className="text-lg font-semibold text-white mb-4">Notification Preferences</h3>
+      <div className="space-y-4">
         {Object.entries(settings.notifications).map(([key, value]) => (
-          <div key={key} className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-            <div>
-              <h4 className="text-white font-medium capitalize">
-                {key.replace(/([A-Z])/g, ' $1').trim()}
-              </h4>
-              <p className="text-gray-400 text-sm">
-                {key === "emailNotifications" && "Receive email notifications"}
-                {key === "smsNotifications" && "Receive SMS notifications"}
-                {key === "pushNotifications" && "Receive push notifications"}
-                {key === "maintenanceAlerts" && "Maintenance due alerts"}
-                {key === "paymentReminders" && "Payment reminder notifications"}
-                {key === "overdueAlerts" && "Overdue payment alerts"}
-              </p>
-            </div>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => updateSetting("notifications", key, !value)}
-              className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-                value ? "bg-blue-500" : "bg-gray-600"
-              }`}
-            >
-              <motion.div
-                animate={{ x: value ? 24 : 2 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className="absolute top-1 w-4 h-4 bg-white rounded-full"
-              />
-            </motion.button>
-          </div>
+          <label key={key} className="flex items-center justify-between">
+            <span className="text-white capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+            <input
+              type="checkbox"
+              checked={value}
+              onChange={(e) => handleSettingChange('notifications', key, e.target.checked)}
+              className="rounded"
+            />
+          </label>
         ))}
       </div>
     </div>
@@ -213,55 +428,84 @@ export default function SettingsPage() {
   const renderSecuritySettings = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-          <div>
-            <h4 className="text-white font-medium">Two-Factor Authentication</h4>
-            <p className="text-gray-400 text-sm">Enable 2FA for enhanced security</p>
-          </div>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => updateSetting("security", "twoFactorAuth", !settings.security.twoFactorAuth)}
-            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-              settings.security.twoFactorAuth ? "bg-green-500" : "bg-gray-600"
-            }`}
-          >
-            <motion.div
-              animate={{ x: settings.security.twoFactorAuth ? 24 : 2 }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              className="absolute top-1 w-4 h-4 bg-white rounded-full"
-            />
-          </motion.button>
-        </div>
-        
         <div>
-          <label className="block text-white font-medium mb-2">Session Timeout (minutes)</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Session Timeout (minutes)</label>
           <input
             type="number"
+            min="5"
+            max="1440"
             value={settings.security.sessionTimeout}
-            onChange={(e) => updateSetting("security", "sessionTimeout", parseInt(e.target.value))}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            onChange={(e) => handleSettingChange('security', 'sessionTimeout', parseInt(e.target.value))}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           />
         </div>
-        
+
         <div>
-          <label className="block text-white font-medium mb-2">Password Expiry (days)</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Password Expiry (days)</label>
           <input
             type="number"
+            min="30"
+            max="365"
             value={settings.security.passwordExpiry}
-            onChange={(e) => updateSetting("security", "passwordExpiry", parseInt(e.target.value))}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            onChange={(e) => handleSettingChange('security', 'passwordExpiry', parseInt(e.target.value))}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           />
         </div>
-        
+
         <div>
-          <label className="block text-white font-medium mb-2">Max Login Attempts</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Max Login Attempts</label>
           <input
             type="number"
+            min="3"
+            max="10"
             value={settings.security.maxLoginAttempts}
-            onChange={(e) => updateSetting("security", "maxLoginAttempts", parseInt(e.target.value))}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            onChange={(e) => handleSettingChange('security', 'maxLoginAttempts', parseInt(e.target.value))}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           />
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">IP Whitelist (comma separated)</label>
+          <input
+            type="text"
+            placeholder="192.168.1.1, 10.0.0.1"
+            value={settings.security.ipWhitelist}
+            onChange={(e) => handleSettingChange('security', 'ipWhitelist', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={settings.security.twoFactorAuth}
+            onChange={(e) => handleSettingChange('security', 'twoFactorAuth', e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-white">Enable Two-Factor Authentication</span>
+        </label>
+
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={settings.security.requirePasswordChange}
+            onChange={(e) => handleSettingChange('security', 'requirePasswordChange', e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-white">Require Password Change on First Login</span>
+        </label>
+
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={settings.security.encryptData}
+            onChange={(e) => handleSettingChange('security', 'encryptData', e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-white">Encrypt Sensitive Data</span>
+        </label>
       </div>
     </div>
   );
@@ -270,11 +514,11 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-white font-medium mb-2">Backup Frequency</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Backup Frequency</label>
           <select
             value={settings.system.backupFrequency}
-            onChange={(e) => updateSetting("system", "backupFrequency", e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            onChange={(e) => handleSettingChange('system', 'backupFrequency', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           >
             <option value="hourly">Hourly</option>
             <option value="daily">Daily</option>
@@ -282,209 +526,273 @@ export default function SettingsPage() {
             <option value="monthly">Monthly</option>
           </select>
         </div>
-        
+
         <div>
-          <label className="block text-white font-medium mb-2">Data Retention (days)</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Data Retention (days)</label>
           <input
             type="number"
+            min="30"
             value={settings.system.dataRetention}
-            onChange={(e) => updateSetting("system", "dataRetention", parseInt(e.target.value))}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            onChange={(e) => handleSettingChange('system', 'dataRetention', parseInt(e.target.value))}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           />
         </div>
-        
-        <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-          <div>
-            <h4 className="text-white font-medium">Maintenance Mode</h4>
-            <p className="text-gray-400 text-sm">Enable system maintenance mode</p>
-          </div>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => updateSetting("system", "maintenanceMode", !settings.system.maintenanceMode)}
-            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-              settings.system.maintenanceMode ? "bg-red-500" : "bg-gray-600"
-            }`}
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Log Level</label>
+          <select
+            value={settings.system.logLevel}
+            onChange={(e) => handleSettingChange('system', 'logLevel', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           >
-            <motion.div
-              animate={{ x: settings.system.maintenanceMode ? 24 : 2 }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              className="absolute top-1 w-4 h-4 bg-white rounded-full"
-            />
-          </motion.button>
+            <option value="error">Error</option>
+            <option value="warn">Warning</option>
+            <option value="info">Info</option>
+            <option value="debug">Debug</option>
+          </select>
         </div>
-        
-        <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-          <div>
-            <h4 className="text-white font-medium">Auto Updates</h4>
-            <p className="text-gray-400 text-sm">Automatically install system updates</p>
-          </div>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => updateSetting("system", "autoUpdates", !settings.system.autoUpdates)}
-            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-              settings.system.autoUpdates ? "bg-green-500" : "bg-gray-600"
-            }`}
-          >
-            <motion.div
-              animate={{ x: settings.system.autoUpdates ? 24 : 2 }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              className="absolute top-1 w-4 h-4 bg-white rounded-full"
-            />
-          </motion.button>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">API Rate Limit (per hour)</label>
+          <input
+            type="number"
+            min="100"
+            value={settings.system.apiRateLimit}
+            onChange={(e) => handleSettingChange('system', 'apiRateLimit', parseInt(e.target.value))}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          />
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Max File Size (MB)</label>
+          <input
+            type="number"
+            min="1"
+            max="100"
+            value={settings.system.maxFileSize}
+            onChange={(e) => handleSettingChange('system', 'maxFileSize', parseInt(e.target.value))}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={settings.system.maintenanceMode}
+            onChange={(e) => handleSettingChange('system', 'maintenanceMode', e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-white">Maintenance Mode</span>
+        </label>
+
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={settings.system.debugMode}
+            onChange={(e) => handleSettingChange('system', 'debugMode', e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-white">Debug Mode</span>
+        </label>
       </div>
     </div>
   );
 
-  const renderAppearanceSettings = () => (
+  const renderIntegrationsSettings = () => (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-white font-medium mb-2">Theme</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">SMS Gateway</label>
           <select
-            value={settings.appearance.theme}
-            onChange={(e) => updateSetting("appearance", "theme", e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            value={settings.integrations.smsGateway}
+            onChange={(e) => handleSettingChange('integrations', 'smsGateway', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
           >
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-            <option value="auto">Auto</option>
+            <option value="twilio">Twilio</option>
+            <option value="textlocal">TextLocal</option>
+            <option value="msg91">MSG91</option>
+            <option value="aws-sns">AWS SNS</option>
           </select>
         </div>
-        
+
         <div>
-          <label className="block text-white font-medium mb-2">Accent Color</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Payment Gateway</label>
+          <select
+            value={settings.integrations.paymentGateway}
+            onChange={(e) => handleSettingChange('integrations', 'paymentGateway', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          >
+            <option value="razorpay">Razorpay</option>
+            <option value="stripe">Stripe</option>
+            <option value="payu">PayU</option>
+            <option value="ccavenue">CCAvenue</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Email Service</label>
+          <select
+            value={settings.integrations.emailService}
+            onChange={(e) => handleSettingChange('integrations', 'emailService', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          >
+            <option value="sendgrid">SendGrid</option>
+            <option value="mailgun">Mailgun</option>
+            <option value="ses">AWS SES</option>
+            <option value="smtp">Custom SMTP</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Cloud Storage</label>
+          <select
+            value={settings.integrations.cloudStorage}
+            onChange={(e) => handleSettingChange('integrations', 'cloudStorage', e.target.value)}
+            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+          >
+            <option value="aws">AWS S3</option>
+            <option value="gcp">Google Cloud</option>
+            <option value="azure">Azure Blob</option>
+            <option value="cloudinary">Cloudinary</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <label className="flex items-center gap-3">
           <input
-            type="color"
-            value={settings.appearance.accentColor}
-            onChange={(e) => updateSetting("appearance", "accentColor", e.target.value)}
-            className="w-full h-12 bg-gray-800 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+            type="checkbox"
+            checked={settings.integrations.googleMaps}
+            onChange={(e) => handleSettingChange('integrations', 'googleMaps', e.target.checked)}
+            className="rounded"
           />
-        </div>
-        
-        <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-          <div>
-            <h4 className="text-white font-medium">Compact Mode</h4>
-            <p className="text-gray-400 text-sm">Use compact interface layout</p>
-          </div>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => updateSetting("appearance", "compactMode", !settings.appearance.compactMode)}
-            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-              settings.appearance.compactMode ? "bg-blue-500" : "bg-gray-600"
-            }`}
-          >
-            <motion.div
-              animate={{ x: settings.appearance.compactMode ? 24 : 2 }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              className="absolute top-1 w-4 h-4 bg-white rounded-full"
-            />
-          </motion.button>
-        </div>
-        
-        <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-          <div>
-            <h4 className="text-white font-medium">Animations</h4>
-            <p className="text-gray-400 text-sm">Enable interface animations</p>
-          </div>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => updateSetting("appearance", "showAnimations", !settings.appearance.showAnimations)}
-            className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-              settings.appearance.showAnimations ? "bg-blue-500" : "bg-gray-600"
-            }`}
-          >
-            <motion.div
-              animate={{ x: settings.appearance.showAnimations ? 24 : 2 }}
-              transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              className="absolute top-1 w-4 h-4 bg-white rounded-full"
-            />
-          </motion.button>
-        </div>
+          <span className="text-white">Google Maps Integration</span>
+        </label>
+
+        <label className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            checked={settings.integrations.analyticsTracking}
+            onChange={(e) => handleSettingChange('integrations', 'analyticsTracking', e.target.checked)}
+            className="rounded"
+          />
+          <span className="text-white">Analytics Tracking</span>
+        </label>
       </div>
     </div>
   );
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "general": return renderGeneralSettings();
+      case "fleet": return renderFleetSettings();
+      case "notifications": return renderNotificationSettings();
+      case "security": return renderSecuritySettings();
+      case "system": return renderSystemSettings();
+      case "integrations": return renderIntegrationsSettings();
+      default: return renderGeneralSettings();
+    }
+  };
+
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6 space-y-8">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <FaCog className="text-blue-500" />
-            Settings & Configuration
+          <h1 className="text-3xl font-bold text-white flex items-center">
+            <FaCog className="mr-3 text-gray-400" />
+            Settings
           </h1>
-          <p className="text-gray-400 mt-1">Manage system settings and preferences</p>
+          <p className="text-gray-400 mt-1">Configure your CheetahRide system preferences</p>
         </div>
-        <div className="flex items-center gap-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={saveSettings}
-            disabled={saving}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+
+        <div className="flex gap-4">
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleImportSettings}
+            className="hidden"
+            id="import-settings"
+          />
+          <label
+            htmlFor="import-settings"
+            className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded font-medium cursor-pointer flex items-center"
           >
-            {saving ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                Saving...
-              </>
-            ) : saved ? (
-              <>
-                <FaCheck /> Saved!
-              </>
-            ) : (
-              <>
-                <FaSave /> Save Changes
-              </>
-            )}
-          </motion.button>
+            <FaUpload className="mr-2" size={14} />
+            Import
+          </label>
+          
+          <button
+            onClick={handleExportSettings}
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-medium flex items-center"
+          >
+            <FaDownload className="mr-2" size={14} />
+            Export
+          </button>
+
+          <button
+            onClick={resetToDefaults}
+            className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-medium"
+          >
+            Reset
+          </button>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar Tabs */}
-        <div className="lg:w-64">
-          <div className="space-y-2">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Sidebar Navigation */}
+        <div className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-4 rounded-2xl border border-gray-700/50">
+          <nav className="space-y-2">
             {tabs.map((tab) => (
-              <motion.button
+              <button
                 key={tab.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 ${
+                className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-all ${
                   activeTab === tab.id
-                    ? `bg-gradient-to-br ${tab.color} border-blue-500/50`
-                    : "bg-gray-900/50 border-gray-700/50 hover:border-gray-600"
+                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
+                    : 'text-gray-300 hover:bg-white/5'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  {tab.icon}
-                  <span className="text-white font-medium">{tab.label}</span>
-                </div>
-              </motion.button>
+                {tab.icon}
+                <span className="font-medium">{tab.label}</span>
+              </button>
             ))}
-          </div>
+          </nav>
         </div>
 
-        {/* Content Area */}
-        <div className="flex-1">
+        {/* Settings Content */}
+        <div className="lg:col-span-3">
           <motion.div
             key={activeTab}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3 }}
-            className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-8 rounded-2xl border border-gray-700/50"
+            className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
           >
-            <h2 className="text-2xl font-bold text-white mb-6 capitalize">
-              {tabs.find(tab => tab.id === activeTab)?.label} Settings
-            </h2>
-            
-            {activeTab === "general" && renderGeneralSettings()}
-            {activeTab === "notifications" && renderNotificationSettings()}
-            {activeTab === "security" && renderSecuritySettings()}
-            {activeTab === "system" && renderSystemSettings()}
-            {activeTab === "appearance" && renderAppearanceSettings()}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-white capitalize">{activeTab} Settings</h2>
+              <button
+                onClick={handleSaveSettings}
+                disabled={saving}
+                className="cheetah-gradient-btn px-6 py-2 font-semibold flex items-center"
+              >
+                {saving ? (
+                  <>
+                    <FaCog className="mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <FaSave className="mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </button>
+            </div>
+
+            {renderTabContent()}
           </motion.div>
         </div>
       </div>

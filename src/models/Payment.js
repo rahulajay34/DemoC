@@ -4,7 +4,6 @@ const PaymentSchema = new mongoose.Schema({
   paymentId: {
     type: String,
     required: true,
-    unique: true,
     default: function() {
       return 'PAY' + Date.now().toString(36).toUpperCase();
     }
@@ -12,45 +11,32 @@ const PaymentSchema = new mongoose.Schema({
   assignment: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Assignment",
-    required: [true, 'Assignment is required']
+    required: true
   },
   rider: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Rider",
-    required: [true, 'Rider is required']
+    required: true
   },
   type: {
     type: String,
-    required: [true, 'Payment type is required'],
-    enum: {
-      values: ['monthly_rent', 'security_deposit', 'maintenance_charge', 'damage_charge', 'late_fee', 'refund', 'adjustment'],
-      message: '{VALUE} is not a valid payment type'
-    }
+    required: true
   },
   amount: {
     type: Number,
-    required: [true, 'Amount is required'],
-    min: [0, 'Amount cannot be negative']
+    required: true
   },
   dueDate: {
     type: Date,
-    required: [true, 'Due date is required']
+    required: true
   },
   paidDate: Date,
   paymentMethod: {
     type: String,
-    enum: {
-      values: ['cash', 'card', 'upi', 'bank_transfer', 'cheque', 'wallet', 'emi'],
-      message: '{VALUE} is not a valid payment method'
-    },
-    required: [true, 'Payment method is required']
+    required: true
   },
   status: {
     type: String,
-    enum: {
-      values: ['pending', 'paid', 'partial', 'overdue', 'failed', 'refunded', 'cancelled'],
-      message: '{VALUE} is not a valid payment status'
-    },
     default: 'pending'
   },
   transactionDetails: {
@@ -64,30 +50,30 @@ const PaymentSchema = new mongoose.Schema({
   gateway: {
     provider: { type: String, trim: true }, // razorpay, payu, etc.
     gatewayTransactionId: { type: String, trim: true },
-    gatewayFee: { type: Number, min: 0, default: 0 },
+    gatewayFee: { type: Number, default: 0 },
     currency: { type: String, default: 'INR' }
   },
   installments: {
     isInstallment: { type: Boolean, default: false },
-    installmentNumber: { type: Number, min: 1 },
-    totalInstallments: { type: Number, min: 1 },
-    installmentAmount: { type: Number, min: 0 }
+    installmentNumber: { type: Number },
+    totalInstallments: { type: Number },
+    installmentAmount: { type: Number }
   },
   lateFee: {
-    amount: { type: Number, default: 0, min: 0 },
-    daysLate: { type: Number, default: 0, min: 0 },
-    feePerDay: { type: Number, default: 0, min: 0 }
+    amount: { type: Number, default: 0 },
+    daysLate: { type: Number, default: 0 },
+    feePerDay: { type: Number, default: 0 }
   },
   discount: {
-    amount: { type: Number, default: 0, min: 0 },
-    percentage: { type: Number, default: 0, min: 0, max: 100 },
+    amount: { type: Number, default: 0 },
+    percentage: { type: Number, default: 0 },
     reason: { type: String, trim: true },
     approvedBy: { type: String, trim: true }
   },
   tax: {
-    gst: { type: Number, default: 0, min: 0 },
-    otherTax: { type: Number, default: 0, min: 0 },
-    taxAmount: { type: Number, default: 0, min: 0 }
+    gst: { type: Number, default: 0 },
+    otherTax: { type: Number, default: 0 },
+    taxAmount: { type: Number, default: 0 }
   },
   receipt: {
     receiptNumber: { type: String, trim: true },
@@ -102,13 +88,12 @@ const PaymentSchema = new mongoose.Schema({
   },
   refund: {
     isRefundable: { type: Boolean, default: false },
-    refundAmount: { type: Number, min: 0 },
+    refundAmount: { type: Number },
     refundReason: String,
     refundDate: Date,
     refundTransactionId: String,
     refundStatus: {
-      type: String,
-      enum: ['pending', 'processed', 'failed', 'completed']
+      type: String
     }
   },
   reminder: {

@@ -121,40 +121,52 @@ export default function TicketList({ onTicketSelect, refreshTrigger }) {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-800"
+          style={{ 
+            color: '#1f2937',
+            backgroundColor: 'white'
+          }}
         >
-          <option value="">All Status</option>
-          <option value="open">Open</option>
-          <option value="in-progress">In Progress</option>
-          <option value="pending">Pending</option>
-          <option value="resolved">Resolved</option>
-          <option value="closed">Closed</option>
+          <option value="" style={{ color: '#1f2937', backgroundColor: 'white' }}>All Status</option>
+          <option value="open" style={{ color: '#1f2937', backgroundColor: 'white' }}>Open</option>
+          <option value="in-progress" style={{ color: '#1f2937', backgroundColor: 'white' }}>In Progress</option>
+          <option value="pending" style={{ color: '#1f2937', backgroundColor: 'white' }}>Pending</option>
+          <option value="resolved" style={{ color: '#1f2937', backgroundColor: 'white' }}>Resolved</option>
+          <option value="closed" style={{ color: '#1f2937', backgroundColor: 'white' }}>Closed</option>
         </select>
 
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-800"
+          style={{ 
+            color: '#1f2937',
+            backgroundColor: 'white'
+          }}
         >
-          <option value="">All Categories</option>
-          <option value="general">General</option>
-          <option value="technical">Technical</option>
-          <option value="billing">Billing</option>
-          <option value="maintenance">Maintenance</option>
-          <option value="complaint">Complaint</option>
-          <option value="suggestion">Suggestion</option>
+          <option value="" style={{ color: '#1f2937', backgroundColor: 'white' }}>All Categories</option>
+          <option value="general" style={{ color: '#1f2937', backgroundColor: 'white' }}>General</option>
+          <option value="technical" style={{ color: '#1f2937', backgroundColor: 'white' }}>Technical</option>
+          <option value="billing" style={{ color: '#1f2937', backgroundColor: 'white' }}>Billing</option>
+          <option value="maintenance" style={{ color: '#1f2937', backgroundColor: 'white' }}>Maintenance</option>
+          <option value="complaint" style={{ color: '#1f2937', backgroundColor: 'white' }}>Complaint</option>
+          <option value="suggestion" style={{ color: '#1f2937', backgroundColor: 'white' }}>Suggestion</option>
         </select>
 
         <select
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-800"
+          style={{ 
+            color: '#1f2937',
+            backgroundColor: 'white'
+          }}
         >
-          <option value="">All Priorities</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="urgent">Urgent</option>
+          <option value="" style={{ color: '#1f2937', backgroundColor: 'white' }}>All Priorities</option>
+          <option value="low" style={{ color: '#1f2937', backgroundColor: 'white' }}>Low</option>
+          <option value="medium" style={{ color: '#1f2937', backgroundColor: 'white' }}>Medium</option>
+          <option value="high" style={{ color: '#1f2937', backgroundColor: 'white' }}>High</option>
+          <option value="urgent" style={{ color: '#1f2937', backgroundColor: 'white' }}>Urgent</option>
         </select>
       </div>
 

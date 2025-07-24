@@ -4,84 +4,61 @@ const AssignmentSchema = new mongoose.Schema({
   rider: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Rider",
-    required: [true, 'Rider is required']
+    required: true
   },
   bike: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: "Bike",
-    required: [true, 'Bike is required']
+    required: true
   },
   assignmentId: {
     type: String,
     required: true,
-    unique: true,
     default: function() {
       return 'ASG' + Date.now().toString(36).toUpperCase();
     }
   },
   startDate: { 
     type: Date, 
-    required: [true, 'Start date is required'],
+    required: true,
     default: Date.now 
   },
   endDate: { 
-    type: Date,
-    validate: {
-      validator: function(v) {
-        return !v || v > this.startDate;
-      },
-      message: 'End date must be after start date'
-    }
+    type: Date
   },
   tenureMonths: { 
     type: Number,
-    required: [true, 'Tenure in months is required'],
-    min: [1, 'Tenure must be at least 1 month'],
-    max: [60, 'Tenure cannot exceed 60 months']
+    required: true
   },
   monthlyCharge: { 
     type: Number,
-    required: [true, 'Monthly charge is required'],
-    min: [0, 'Monthly charge cannot be negative']
+    required: true
   },
   securityDeposit: {
     type: Number,
-    required: [true, 'Security deposit is required'],
-    min: [0, 'Security deposit cannot be negative']
+    required: true
   },
   totalAmount: {
-    type: Number,
-    min: [0, 'Total amount cannot be negative']
+    type: Number
   },
   paidAmount: {
     type: Number,
-    default: 0,
-    min: [0, 'Paid amount cannot be negative']
+    default: 0
   },
   pendingAmount: {
     type: Number,
-    default: 0,
-    min: [0, 'Pending amount cannot be negative']
+    default: 0
   },
   status: {
     type: String,
-    enum: {
-      values: ['active', 'completed', 'terminated', 'suspended', 'pending'],
-      message: '{VALUE} is not a valid assignment status'
-    },
     default: 'active'
   },
   paymentStatus: {
     type: String,
-    enum: {
-      values: ['paid', 'partial', 'pending', 'overdue'],
-      message: '{VALUE} is not a valid payment status'
-    },
     default: 'pending'
   },
   paymentMethod: {
     type: String,
-    enum: ['cash', 'card', 'upi', 'bank_transfer', 'cheque'],
     default: 'cash'
   },
   deliveryDetails: {
@@ -109,14 +86,12 @@ const AssignmentSchema = new mongoose.Schema({
       }
     },
     condition: {
-      type: String,
-      enum: ['excellent', 'good', 'fair', 'damaged']
+      type: String
     },
     damageReport: String,
     returnImages: [String],
     fuelLevel: {
-      type: String,
-      enum: ['full', 'three_quarter', 'half', 'quarter', 'empty']
+      type: String
     },
     mileageAtReturn: Number
   },
@@ -146,8 +121,7 @@ const AssignmentSchema = new mongoose.Schema({
     amount: Number,
     paymentDate: { type: Date, default: Date.now },
     paymentMethod: {
-      type: String,
-      enum: ['cash', 'card', 'upi', 'bank_transfer', 'cheque']
+      type: String
     },
     transactionId: String,
     dueDate: Date,
@@ -175,9 +149,9 @@ const AssignmentSchema = new mongoose.Schema({
     expiryAlerts: { type: Boolean, default: true }
   },
   rating: {
-    riderRating: { type: Number, min: 0, max: 5 },
-    bikeRating: { type: Number, min: 0, max: 5 },
-    serviceRating: { type: Number, min: 0, max: 5 }
+    riderRating: { type: Number },
+    bikeRating: { type: Number },
+    serviceRating: { type: Number }
   },
   feedback: {
     riderFeedback: String,
