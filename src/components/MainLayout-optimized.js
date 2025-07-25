@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "./Sidebar";
 import Toast from "./Toast";
+import CustomCursor from "./CustomCursor";
 import { useAuth } from "@/context/AuthContext";
 import { ClipLoader } from "react-spinners";
 
@@ -146,29 +147,44 @@ export default function MainLayout({ children }) {
     return null;
   }
 
-  // Page transition variants optimized for performance
+  // Page transition variants optimized for performance with grabandgo inspiration
   const pageVariants = {
-    initial: { opacity: 0, x: 20 },
+    initial: { 
+      opacity: 0, 
+      x: 30,
+      scale: 0.99,
+      filter: "blur(2px)"
+    },
     animate: { 
       opacity: 1, 
       x: 0,
+      scale: 1,
+      filter: "blur(0px)",
       transition: { 
-        duration: 0.3,
-        ease: "easeOut"
+        duration: 0.4,
+        ease: [0.43, 0.13, 0.23, 0.96],
+        staggerChildren: 0.08,
+        when: "beforeChildren"
       }
     },
     exit: { 
       opacity: 0, 
-      x: -20,
+      x: -30, 
+      scale: 0.98,
+      filter: "blur(1px)",
       transition: { 
-        duration: 0.2,
-        ease: "easeIn"
+        duration: 0.3,
+        ease: [0.43, 0.13, 0.23, 0.96],
+        when: "afterChildren"
       }
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 transition-all duration-300">
+      {/* Custom Cursor */}
+      <CustomCursor />
+      
       {/* Optimized Sidebar */}
       <Sidebar />
       
@@ -221,6 +237,9 @@ export default function MainLayout({ children }) {
         {/* Performance Monitor */}
         <PerformanceMonitor />
       </div>
+
+      {/* Custom cursor for desktop */}
+      <CustomCursor />
 
       {/* Toast notifications */}
       <Toast />

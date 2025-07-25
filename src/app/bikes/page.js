@@ -1,12 +1,15 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch, FaTimes, FaPlus, FaEdit, FaTrash, FaEye, FaMotorcycle, FaCog, FaIdBadge, FaCertificate } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
 import SkeletonTable from "@/components/SkeletonTable";
 import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
+import { staggerContainer, staggerItem, staggerContainerVariants } from "@/components/PageTransition";
+import ProtectedRoute from "../../components/ProtectedRoute.js";
 
-export default function BikesPage() {
+function BikesPage() {
   const [bikes, setBikes] = useState([]);
   const [filteredBikes, setFilteredBikes] = useState([]);
   const [searchActive, setSearchActive] = useState(false);
@@ -478,13 +481,27 @@ export default function BikesPage() {
                   <th className="px-4 py-3 text-left">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <motion.tbody
+                variants={staggerContainerVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
                 {filteredBikes.length > 0 ? (
                   filteredBikes.map((bike, idx) => (
-                    <tr
+                    <motion.tr
                       key={bike._id}
-                      className="border-b border-white/10 animate-slide-up hover:bg-white/5"
-                      style={{ animationDelay: `${idx * 80}ms` }}
+                      variants={staggerItem}
+                      className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200"
+                      whileHover={{ 
+                        backgroundColor: "rgba(255, 255, 255, 0.08)",
+                        scale: 1.01,
+                        y: -2,
+                        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                        transition: { duration: 0.2, ease: "easeOut" }
+                      }}
+                      whileTap={{ scale: 0.99 }}
+                      layout
                     >
                       <td className="px-4 py-3">
                         <div>
@@ -529,16 +546,16 @@ export default function BikesPage() {
                           </button>
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))
                 ) : (
-                  <tr>
+                  <motion.tr variants={staggerItem}>
                     <td colSpan="7" className="text-center py-6 text-white/50">
                       No bikes found.
                     </td>
-                  </tr>
+                  </motion.tr>
                 )}
-              </tbody>
+              </motion.tbody>
             </table>
           </div>
         )}
@@ -567,5 +584,13 @@ export default function BikesPage() {
         )}
       </div>
     </section>
+  );
+}
+
+export default function BikesPageWithProtection() {
+  return (
+    <ProtectedRoute>
+      <BikesPage />
+    </ProtectedRoute>
   );
 }

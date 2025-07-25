@@ -14,17 +14,66 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
-/* Button animations */
+/* Enhanced Button animations with lift and tactile feedback */
 .btn-animate {
-  transition: all 0.2s ease-out;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
 }
 
 .btn-animate:hover {
-  transform: scale(1.05);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 10px 25px -5px rgba(0, 0, 0, 0.3),
+    0 8px 10px -6px rgba(0, 0, 0, 0.2);
 }
 
 .btn-animate:active {
-  transform: scale(0.95);
+  transform: translateY(0) scale(0.97);
+  box-shadow: 
+    0 5px 15px -3px rgba(0, 0, 0, 0.2),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  transition: all 0.1s ease-out;
+}
+
+/* Enhanced gradient button animations */
+.cheetah-gradient-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  will-change: transform, box-shadow;
+}
+
+.cheetah-gradient-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cheetah-gradient-btn:hover::before {
+  left: 100%;
+}
+
+.cheetah-gradient-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 20px 35px -5px rgba(249, 115, 22, 0.4),
+    0 12px 15px -8px rgba(249, 115, 22, 0.3),
+    0 0 0 1px rgba(249, 115, 22, 0.1);
+}
+
+.cheetah-gradient-btn:active {
+  transform: translateY(-1px) scale(0.98);
+  transition: all 0.1s ease-out;
 }
 
 /* Loading animations */
@@ -243,7 +292,7 @@
   }
 }
 
-/* Reduced motion preferences */
+/* Reduced motion preferences - Enhanced accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -251,12 +300,25 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
   
   .float-animation,
   .pulse-glow,
-  .loading-spinner {
+  .loading-spinner,
+  .cheetah-gradient-btn::before {
     animation: none !important;
+  }
+  
+  /* Disable custom cursor for reduced motion */
+  body {
+    cursor: auto !important;
+  }
+  
+  /* Ensure focus remains visible without animation */
+  *:focus {
+    outline: 2px solid #f97316 !important;
+    outline-offset: 2px !important;
   }
 }
 
@@ -269,6 +331,55 @@
 
 .performance-mode .fade-in,
 .performance-mode .slide-in-right,
+.performance-mode .stagger-item {
+  animation: none !important;
+}
+
+/* Hardware acceleration optimizations */
+.page-transition,
+.card-hover,
+.btn-animate,
+.glass-card,
+.cheetah-gradient-btn {
+  will-change: transform, opacity;
+  transform: translateZ(0); /* Force hardware acceleration */
+  backface-visibility: hidden;
+}
+
+/* Animation performance optimizations */
+@keyframes optimizedFadeIn {
+  from { 
+    opacity: 0; 
+    transform: translate3d(0, 20px, 0); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translate3d(0, 0, 0); 
+  }
+}
+
+.optimized-fade-in {
+  animation: optimizedFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Force GPU compositing for smooth animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+}
+
+/* Focus states with enhanced accessibility */
+.interactive-element:focus-visible {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.2);
+  transition: box-shadow 0.2s ease;
+}
 .performance-mode .stagger-item {
   animation: none !important;
   opacity: 1 !important;

@@ -1,11 +1,13 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import ProtectedRoute from "../../components/ProtectedRoute.js";
 import { FaSearch, FaTimes, FaPlus, FaEdit, FaTrash, FaEye, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
 import SkeletonTable from "@/components/SkeletonTable";
 import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
+import { staggerContainer, staggerItem, staggerContainerVariants } from "@/components/PageTransition";
 
 export default function RidersPage() {
   const [riders, setRiders] = useState([]);
@@ -477,13 +479,27 @@ export default function RidersPage() {
                     <th className="px-4 py-3 text-left">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <motion.tbody 
+                  variants={staggerContainerVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
                   {filteredRiders.length > 0 ? (
                     filteredRiders.map((rider, idx) => (
-                      <tr
+                      <motion.tr
                         key={rider._id}
-                        className="border-b border-white/10 animate-slide-up hover:bg-white/5"
-                        style={{ animationDelay: `${idx * 70}ms` }}
+                        variants={staggerItem}
+                        className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200"
+                        whileHover={{ 
+                          backgroundColor: "rgba(255, 255, 255, 0.08)",
+                          scale: 1.01,
+                          y: -2,
+                          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                          transition: { duration: 0.2, ease: "easeOut" }
+                        }}
+                        whileTap={{ scale: 0.99 }}
+                        layout
                       >
                         <td className="px-4 py-3">
                           <div>
@@ -550,16 +566,16 @@ export default function RidersPage() {
                             </button>
                           </div>
                         </td>
-                      </tr>
+                      </motion.tr>
                     ))
                   ) : (
-                    <tr>
+                    <motion.tr variants={staggerItem}>
                       <td colSpan="6" className="text-center py-6 text-white/50">
                         No riders found.
                       </td>
-                    </tr>
+                    </motion.tr>
                   )}
-                </tbody>
+                </motion.tbody>
               </table>
             </div>
           )}

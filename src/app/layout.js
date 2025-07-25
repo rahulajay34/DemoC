@@ -1,4 +1,5 @@
 import "./globals.css";
+import "../styles/responsive-animations.css";
 import { Providers } from './providers';
 import { AuthProvider } from "../context/AuthContext";
 import { ToastProvider } from "../context/ToastContext";

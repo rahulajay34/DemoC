@@ -21,13 +21,14 @@ import {
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import CheetahLogo from "./CheetahLogo";
-import { motion } from "framer-motion"; // Import framer-motion
+import { motion, AnimatePresence } from "framer-motion"; // Import framer-motion
 
 export default function Sidebar() {
   const { logout } = useAuth();
   const { theme, getThemeClasses } = useTheme();
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const [hoveredLink, setHoveredLink] = useState(null);
   const [sidebarStats, setSidebarStats] = useState({
     activeRiders: 0,
     availableBikes: 0,
@@ -35,6 +36,49 @@ export default function Sidebar() {
     maintenanceDue: 0,
     loading: true
   });
+
+  // Animation variants for navigation links with enhanced interactions
+  const navContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.2
+      }
+    }
+  };
+
+  const navItemVariants = {
+    hidden: { opacity: 0, x: -20, scale: 0.9 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      scale: 1,
+      transition: { 
+        duration: 0.4, 
+        ease: [0.43, 0.13, 0.23, 0.96],
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  };
+
+  // Enhanced hover animations
+  const iconHoverVariants = {
+    hover: {
+      scale: 1.15,
+      rotate: [0, -5, 5, 0],
+      transition: {
+        duration: 0.3,
+        ease: "easeOut"
+      }
+    },
+    tap: {
+      scale: 0.95
+    }
+  };
 
   // Close sidebar when screen size changes to desktop
   useEffect(() => {
@@ -152,34 +196,76 @@ export default function Sidebar() {
           <div className="mb-12 px-2">
             <CheetahLogo className="w-[158px] h-[40px] text-orange-400" />
           </div>
-          <div className="flex flex-col gap-2 text-sm font-medium">
-            {navLinks.map((link) => {
+          <motion.div 
+            className="flex flex-col gap-2 text-sm font-medium"
+            variants={navContainerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {navLinks.map((link, index) => {
               const isActive = pathname === link.href;
+              const isHovered = hoveredLink === link.href;
               return (
-                <Link
+                <motion.div
                   key={link.href}
-                  href={link.href}
-                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-300 ${
-                    isActive
-                      ? `${theme.colors.textPrimary} font-semibold`
-                      : `${theme.colors.textSecondary} hover:${theme.colors.textPrimary} ${getThemeClasses('hover:bg-slate-100', 'hover:bg-gray-800/50')}`
-                  }`}
+                  variants={navItemVariants}
+                  className="relative"
+                  onMouseEnter={() => setHoveredLink(link.href)}
+                  onMouseLeave={() => setHoveredLink(null)}
                 >
-                  {/* ✨ This is the animated sliding indicator ✨ */}
-                  {isActive && (
-                    <motion.div
-                      layoutId="active-pill"
-                      className="absolute inset-0 active-glass-link"
-                      style={{ borderRadius: "0.75rem" }}
-                      transition={{ duration: 0.6, type: "spring" }}
-                    />
-                  )}
-                  <span className="relative z-10">{link.icon}</span>
-                  <span className="relative z-10">{link.label}</span>
-                </Link>
+                  <Link
+                    href={link.href}
+                    className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                      isActive
+                        ? `${theme.colors.textPrimary} font-semibold`
+                        : `${theme.colors.textSecondary} hover:${theme.colors.textPrimary} ${getThemeClasses('hover:bg-slate-100', 'hover:bg-gray-800/50')}`
+                    }`}
+                  >
+                    {/* ✨ Active sliding indicator ✨ */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="active-pill"
+                        className="absolute inset-0 active-glass-link"
+                        style={{ borderRadius: "0.75rem" }}
+                        transition={{ duration: 0.6, type: "spring" }}
+                      />
+                    )}
+                    
+                    {/* ✨ Hover preview pill with improved animation ✨ */}
+                    <AnimatePresence>
+                      {isHovered && !isActive && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                          animate={{ opacity: 1, scale: 1, x: 0 }}
+                          exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                          className={`absolute inset-0 ${getThemeClasses('bg-slate-100/60', 'bg-gray-800/40')} backdrop-blur-sm border ${getThemeClasses('border-slate-200/60', 'border-gray-700/60')}`}
+                          style={{ borderRadius: "0.75rem" }}
+                          transition={{ duration: 0.2, ease: [0.43, 0.13, 0.23, 0.96] }}
+                        />
+                      )}
+                    </AnimatePresence>
+                    
+                    <motion.span 
+                      className="relative z-10"
+                      variants={iconHoverVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      {link.icon}
+                    </motion.span>
+                    <motion.span 
+                      className="relative z-10"
+                      initial={{ opacity: 0.8 }}
+                      whileHover={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {link.label}
+                    </motion.span>
+                  </Link>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         </div>
         
         {/* Quick Stats Section */}

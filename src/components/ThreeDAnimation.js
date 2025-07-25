@@ -5,70 +5,185 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
-// Simple 3D bike model using basic geometries
-function BikeModel({ position = [0, 0, 0], rotation = [0, 0, 0], scale = 1 }) {
+// Simple 3D bike model using basic geometries with enhanced interactivity
+function BikeModel({ position = [0, 0, 0], rotation = [0, 0, 0], scale = 1, mousePosition = { x: 0, y: 0 } }) {
   const bikeRef = useRef();
   
   useFrame((state) => {
     if (bikeRef.current) {
       // Gentle floating animation
       bikeRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime) * 0.1;
-      bikeRef.current.rotation.y += 0.005; // Slow rotation
+      
+      // Mouse-reactive rotation
+      const targetRotationY = rotation[1] + (mousePosition.x * 0.5);
+      const targetRotationX = rotation[0] + (mousePosition.y * 0.3);
+      
+      bikeRef.current.rotation.y += (targetRotationY - bikeRef.current.rotation.y) * 0.05;
+      bikeRef.current.rotation.x += (targetRotationX - bikeRef.current.rotation.x) * 0.03;
     }
   });
 
   return (
     <group ref={bikeRef} position={position} rotation={rotation} scale={scale}>
-      {/* Bike frame */}
+      {/* Enhanced bike frame with better geometry */}
       <mesh position={[0, 0, 0]}>
-        <cylinderGeometry args={[0.05, 0.05, 2, 8]} />
-        <meshStandardMaterial color="#ff6500" />
+        <cylinderGeometry args={[0.05, 0.05, 2, 12]} />
+        <meshStandardMaterial 
+          color="#ff6500" 
+          roughness={0.3}
+          metalness={0.7}
+          emissive="#ff6500"
+          emissiveIntensity={0.1}
+        />
       </mesh>
       
-      {/* Bike wheels */}
-      <mesh position={[-0.8, -0.3, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.3, 0.05, 8, 16]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
-      <mesh position={[0.8, -0.3, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.3, 0.05, 8, 16]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
+      {/* Enhanced bike wheels with spokes */}
+      <group position={[-0.8, -0.3, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh>
+          <torusGeometry args={[0.3, 0.05, 8, 16]} />
+          <meshStandardMaterial color="#333" roughness={0.8} metalness={0.2} />
+        </mesh>
+        {/* Spokes */}
+        {[...Array(8)].map((_, i) => (
+          <mesh key={i} rotation={[0, 0, (i * Math.PI) / 4]}>
+            <cylinderGeometry args={[0.01, 0.01, 0.5, 4]} />
+            <meshStandardMaterial color="#666" />
+          </mesh>
+        ))}
+      </group>
       
-      {/* Handlebars */}
+      <group position={[0.8, -0.3, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh>
+          <torusGeometry args={[0.3, 0.05, 8, 16]} />
+          <meshStandardMaterial color="#333" roughness={0.8} metalness={0.2} />
+        </mesh>
+        {/* Spokes */}
+        {[...Array(8)].map((_, i) => (
+          <mesh key={i} rotation={[0, 0, (i * Math.PI) / 4]}>
+            <cylinderGeometry args={[0.01, 0.01, 0.5, 4]} />
+            <meshStandardMaterial color="#666" />
+          </mesh>
+        ))}
+      </group>
+      
+      {/* Enhanced handlebars */}
       <mesh position={[-0.8, 0.4, 0]}>
         <cylinderGeometry args={[0.02, 0.02, 0.5, 8]} />
-        <meshStandardMaterial color="#666" />
+        <meshStandardMaterial color="#666" roughness={0.4} metalness={0.6} />
       </mesh>
       
-      {/* Seat */}
+      {/* Enhanced seat */}
       <mesh position={[0.5, 0.2, 0]}>
         <boxGeometry args={[0.3, 0.1, 0.2]} />
-        <meshStandardMaterial color="#222" />
+        <meshStandardMaterial color="#222" roughness={0.9} />
+      </mesh>
+      
+      {/* Added pedals */}
+      <mesh position={[0, -0.5, 0.15]}>
+        <boxGeometry args={[0.1, 0.05, 0.05]} />
+        <meshStandardMaterial color="#444" />
+      </mesh>
+      <mesh position={[0, -0.5, -0.15]}>
+        <boxGeometry args={[0.1, 0.05, 0.05]} />
+        <meshStandardMaterial color="#444" />
       </mesh>
     </group>
   );
 }
 
-// Animated scene with multiple bikes
-function AnimatedScene() {
+// Particle system for ambient effects
+function ParticleSystem({ count = 100 }) {
+  const particles = useRef();
+  const particlesPosition = new Float32Array(count * 3);
+  
+  // Initialize particle positions
+  for (let i = 0; i < count; i++) {
+    particlesPosition[i * 3] = (Math.random() - 0.5) * 20;
+    particlesPosition[i * 3 + 1] = (Math.random() - 0.5) * 20;
+    particlesPosition[i * 3 + 2] = (Math.random() - 0.5) * 20;
+  }
+  
+  useFrame((state) => {
+    if (particles.current) {
+      particles.current.rotation.y += 0.001;
+      particles.current.rotation.x += 0.0005;
+    }
+  });
+  
+  return (
+    <points ref={particles}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={count}
+          array={particlesPosition}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial 
+        size={0.05} 
+        color="#ff6500" 
+        transparent 
+        opacity={0.6}
+        sizeAttenuation={true}
+      />
+    </points>
+  );
+}
+
+// Animated scene with multiple bikes and enhanced lighting
+function AnimatedScene({ mousePosition = { x: 0, y: 0 } }) {
   return (
     <>
-      {/* Lighting */}
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} />
+      {/* Enhanced lighting setup */}
+      <ambientLight intensity={0.4} />
+      <directionalLight 
+        position={[10, 10, 5]} 
+        intensity={1.2} 
+        castShadow
+        shadow-mapSize-width={1024}
+        shadow-mapSize-height={1024}
+      />
+      <pointLight position={[-10, -10, -10]} intensity={0.3} color="#4f46e5" />
+      <pointLight position={[10, 5, 10]} intensity={0.4} color="#f59e0b" />
+      <hemisphereLight skyColor="#87ceeb" groundColor="#654321" intensity={0.3} />
       
-      {/* Multiple bike models */}
-      <BikeModel position={[-2, 0, 0]} rotation={[0, 0.5, 0]} scale={0.8} />
-      <BikeModel position={[0, 0, -1]} rotation={[0, 0, 0]} scale={1} />
-      <BikeModel position={[2, 0, 0]} rotation={[0, -0.5, 0]} scale={0.8} />
+      {/* Particle system */}
+      <ParticleSystem count={150} />
       
-      {/* Ground plane */}
-      <mesh position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[10, 10]} />
-        <meshStandardMaterial color="#f0f0f0" transparent opacity={0.5} />
+      {/* Multiple bike models with mouse interaction */}
+      <BikeModel 
+        position={[-2, 0, 0]} 
+        rotation={[0, 0.5, 0]} 
+        scale={0.8} 
+        mousePosition={mousePosition}
+      />
+      <BikeModel 
+        position={[0, 0, -1]} 
+        rotation={[0, 0, 0]} 
+        scale={1} 
+        mousePosition={mousePosition}
+      />
+      <BikeModel 
+        position={[2, 0, 0]} 
+        rotation={[0, -0.5, 0]} 
+        scale={0.8} 
+        mousePosition={mousePosition}
+      />
+      
+      {/* Enhanced ground plane with grid pattern */}
+      <mesh position={[0, -1, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[15, 15]} />
+        <meshStandardMaterial 
+          color="#f0f0f0" 
+          transparent 
+          opacity={0.3}
+          roughness={0.8}
+        />
       </mesh>
+      
+      {/* Grid lines for depth perception */}
+      <gridHelper args={[15, 15, "#999999", "#cccccc"]} position={[0, -0.99, 0]} />
     </>
   );
 }
@@ -118,7 +233,7 @@ function Simple2DFallback({ showBikes = true }) {
   );
 }
 
-// Main 3D component with performance detection
+// Main 3D component with performance detection and mouse interaction
 export default function ThreeDAnimation({ 
   fallbackTo2D = false, 
   height = 300,
@@ -128,6 +243,18 @@ export default function ThreeDAnimation({
   const [use3D, setUse3D] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [performanceMode, setPerformanceMode] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const containerRef = useRef();
+
+  // Mouse tracking for interactive effects
+  const handleMouseMove = (event) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      setMousePosition({ x, y });
+    }
+  };
 
   // Performance detection
   useEffect(() => {
@@ -184,7 +311,12 @@ export default function ThreeDAnimation({
         </button>
       </div>
 
-      <div style={{ height: `${height}px` }} className="rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+      <div 
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        style={{ height: `${height}px` }} 
+        className="rounded-lg overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 cursor-none"
+      >
         <Canvas
           shadows
           camera={{ position: [5, 3, 5], fov: 50 }}
@@ -209,10 +341,10 @@ export default function ThreeDAnimation({
               />
             )}
             
-            <AnimatedScene />
+            <AnimatedScene mousePosition={mousePosition} />
             
-            {/* Fog for depth */}
-            <fog attach="fog" args={['#f0f0f0', 8, 20]} />
+            {/* Enhanced fog for depth */}
+            <fog attach="fog" args={['#f0f0f0', 6, 25]} />
           </Suspense>
         </Canvas>
       </div>

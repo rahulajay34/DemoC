@@ -94,6 +94,37 @@ const pageVariants = {
       scale: 1.1,
       transition: { duration: 0.3 }
     }
+  },
+  grabandgo: {
+    initial: { 
+      opacity: 0, 
+      x: 30,
+      scale: 0.99,
+      filter: "blur(2px)"
+    },
+    animate: { 
+      opacity: 1, 
+      x: 0,
+      scale: 1,
+      filter: "blur(0px)",
+      transition: { 
+        duration: 0.4, 
+        ease: [0.43, 0.13, 0.23, 0.96],
+        staggerChildren: 0.08,
+        when: "beforeChildren"
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      x: -30, 
+      scale: 0.98,
+      filter: "blur(1px)",
+      transition: { 
+        duration: 0.3, 
+        ease: [0.43, 0.13, 0.23, 0.96],
+        when: "afterChildren"
+      }
+    }
   }
 };
 
@@ -232,20 +263,46 @@ export function LoadingTransition({ isLoading, children, fallback }) {
 
 // Staggered children animation for cards/lists
 export const staggerContainer = {
+  initial: "initial",
+  animate: "animate",
+  exit: "exit"
+};
+
+export const staggerContainerVariants = {
+  initial: {},
   animate: {
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.08,
       delayChildren: 0.1
+    }
+  },
+  exit: {
+    transition: {
+      staggerChildren: 0.05,
+      staggerDirection: -1
     }
   }
 };
 
 export const staggerItem = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0, y: 20, scale: 0.95 },
   animate: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 0.5, ease: "easeOut" }
+    scale: 1,
+    transition: { 
+      duration: 0.4, 
+      ease: [0.43, 0.13, 0.23, 0.96] 
+    }
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    scale: 0.95,
+    transition: { 
+      duration: 0.3, 
+      ease: "easeIn" 
+    }
   }
 };
 
