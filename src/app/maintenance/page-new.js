@@ -2,9 +2,11 @@
 import { useState, useEffect } from "react";
 import { FaWrench, FaPlus, FaSearch, FaTimes, FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
+import { useTheme } from "@/context/ThemeContext";
 import SkeletonTable from "@/components/SkeletonTable";
 
 export default function MaintenancePage() {
+  const { theme } = useTheme();
   const [maintenanceRecords, setMaintenanceRecords] = useState([]);
   const [bikes, setBikes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -292,7 +294,7 @@ export default function MaintenancePage() {
               placeholder="Search by bike, type, category, or description..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full sm:w-96 bg-white/10 border border-white/20 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+              className={`w-full sm:w-96 ${theme.colors.input} ${theme.colors.inputFocus} rounded-full px-4 py-2 transition`}
             />
           </div>
         )}
@@ -302,7 +304,7 @@ export default function MaintenancePage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded px-3 py-2"
+            className={`${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2`}
           >
             <option value="">All Statuses</option>
             <option value="scheduled">Scheduled</option>
@@ -315,7 +317,7 @@ export default function MaintenancePage() {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded px-3 py-2"
+            className={`${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2`}
           >
             <option value="">All Priorities</option>
             <option value="critical">Critical</option>
@@ -347,7 +349,7 @@ export default function MaintenancePage() {
               <select
                 value={selectedBike}
                 onChange={(e) => setSelectedBike(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className={`${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2`}
                 required
               >
                 <option value="">Select Bike *</option>
@@ -361,7 +363,7 @@ export default function MaintenancePage() {
               <select
                 value={maintenanceType}
                 onChange={(e) => setMaintenanceType(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className={`${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2`}
                 required
               >
                 <option value="">Select Type *</option>
@@ -376,7 +378,7 @@ export default function MaintenancePage() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className={`${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2`}
                 required
               >
                 <option value="">Select Category *</option>
@@ -393,7 +395,7 @@ export default function MaintenancePage() {
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className={`${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2`}
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -405,7 +407,7 @@ export default function MaintenancePage() {
                 type="date"
                 value={scheduledDate}
                 onChange={(e) => setScheduledDate(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className={`${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2`}
                 title="Select the date when maintenance should be performed"
                 min={new Date().toISOString().split('T')[0]}
                 required
@@ -419,7 +421,7 @@ export default function MaintenancePage() {
                 placeholder="Estimated Cost in ₹ (e.g., 2500.00)"
                 value={estimatedCost}
                 onChange={(e) => setEstimatedCost(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className={`${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2`}
                 title="Please enter estimated cost between ₹100 to ₹50,000"
               />
 
@@ -430,7 +432,7 @@ export default function MaintenancePage() {
                 placeholder="Estimated Duration in hours (e.g., 4)"
                 value={estimatedDuration}
                 onChange={(e) => setEstimatedDuration(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className={`${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2`}
                 title="Please enter duration between 1 to 240 hours (10 days max)"
               />
 
@@ -438,7 +440,7 @@ export default function MaintenancePage() {
                 placeholder="Description (e.g., Replace brake pads, Engine oil change, Regular servicing) *"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2 col-span-full"
+                className={`${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2 col-span-full`}
                 maxLength="500"
                 title="Please describe the maintenance work to be performed (max 500 characters)"
                 rows="3"

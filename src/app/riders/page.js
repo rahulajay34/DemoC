@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProtectedRoute from "../../components/ProtectedRoute.js";
 import { FaSearch, FaTimes, FaPlus, FaEdit, FaTrash, FaEye, FaUser, FaEnvelope, FaPhone, FaIdCard, FaMapMarkerAlt } from "react-icons/fa";
+import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/context/ToastContext";
 import SkeletonTable from "@/components/SkeletonTable";
 import FormInput from "@/components/FormInput";
@@ -10,6 +11,7 @@ import FormSelect from "@/components/FormSelect";
 import { staggerContainer, staggerItem, staggerContainerVariants } from "@/components/PageTransition";
 
 export default function RidersPage() {
+  const { theme, getThemeClasses } = useTheme();
   const [riders, setRiders] = useState([]);
   const [filteredRiders, setFilteredRiders] = useState([]);
   const [searchActive, setSearchActive] = useState(false);
@@ -25,6 +27,16 @@ export default function RidersPage() {
   });
 
   const { toast } = useToast();
+
+  // Status color helper function
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'active': return getThemeClasses('bg-emerald-200/80 text-black border-emerald-300', 'bg-green-500/20 text-green-300');
+      case 'inactive': return getThemeClasses('bg-gray-200/80 text-black border-gray-300', 'bg-gray-500/20 text-gray-300');
+      case 'suspended': return getThemeClasses('bg-red-200/80 text-black border-red-300', 'bg-red-500/20 text-red-300');
+      default: return getThemeClasses('bg-amber-200/80 text-black border-amber-300', 'bg-yellow-500/20 text-yellow-300');
+    }
+  };
 
   // Form refs
   const nameRef = useRef();
@@ -535,15 +547,9 @@ export default function RidersPage() {
                         </td>
                         <td className="px-4 py-3">
                           <span
-                            className={`text-xs font-medium px-2 py-1 rounded-full ${
-                              rider.status === "active"
-                                ? "bg-green-500/20 text-green-300"
-                                : rider.status === "inactive"
-                                ? "bg-gray-500/20 text-gray-300"
-                                : rider.status === "suspended"
-                                ? "bg-red-500/20 text-red-300"
-                                : "bg-yellow-500/20 text-yellow-300"
-                            }`}
+                            className={`text-xs font-medium px-2 py-1 rounded-full ${getStatusColor(
+                              rider.status || 'active'
+                            )}`}
                           >
                             {rider.status || 'active'}
                           </span>

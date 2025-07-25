@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { FaCreditCard, FaPlus, FaSearch, FaTimes, FaEdit, FaTrash, FaDownload, FaRupeeSign, FaCalendarAlt, FaUser } from "react-icons/fa";
+import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/context/ToastContext";
 import SkeletonTable from "@/components/SkeletonTable";
 import FormInput from "@/components/FormInput";
@@ -8,6 +9,7 @@ import FormSelect from "@/components/FormSelect";
 import FormTextarea from "@/components/FormTextarea";
 
 export default function PaymentsPage() {
+  const { theme, getThemeClasses } = useTheme();
   const [payments, setPayments] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [riders, setRiders] = useState([]);
@@ -225,23 +227,23 @@ export default function PaymentsPage() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'paid': return 'bg-green-500/20 text-green-300';
-      case 'pending': return 'bg-yellow-500/20 text-yellow-300';
-      case 'overdue': return 'bg-red-500/20 text-red-300';
-      case 'partial': return 'bg-blue-500/20 text-blue-300';
-      case 'refunded': return 'bg-purple-500/20 text-purple-300';
-      default: return 'bg-gray-500/20 text-gray-300';
+      case 'paid': return getThemeClasses('bg-green-200/80 text-black border-green-300', 'bg-green-500/20 text-green-300');
+      case 'pending': return getThemeClasses('bg-yellow-200/80 text-black border-yellow-300', 'bg-yellow-500/20 text-yellow-300');
+      case 'overdue': return getThemeClasses('bg-red-200/80 text-black border-red-300', 'bg-red-500/20 text-red-300');
+      case 'partial': return getThemeClasses('bg-blue-200/80 text-black border-blue-300', 'bg-blue-500/20 text-blue-300');
+      case 'refunded': return getThemeClasses('bg-purple-200/80 text-black border-purple-300', 'bg-purple-500/20 text-purple-300');
+      default: return getThemeClasses('bg-gray-200/80 text-black border-gray-300', 'bg-gray-500/20 text-gray-300');
     }
   };
 
   const getTypeColor = (type) => {
     switch (type) {
-      case 'monthly_rent': return 'bg-blue-500/20 text-blue-300';
-      case 'security_deposit': return 'bg-green-500/20 text-green-300';
-      case 'maintenance_charge': return 'bg-orange-500/20 text-orange-300';
-      case 'damage_charge': return 'bg-red-500/20 text-red-300';
-      case 'late_fee': return 'bg-purple-500/20 text-purple-300';
-      default: return 'bg-gray-500/20 text-gray-300';
+      case 'monthly_rent': return getThemeClasses('bg-blue-200/80 text-black border-blue-300', 'bg-blue-500/20 text-blue-300');
+      case 'security_deposit': return getThemeClasses('bg-green-200/80 text-black border-green-300', 'bg-green-500/20 text-green-300');
+      case 'maintenance_charge': return getThemeClasses('bg-orange-200/80 text-black border-orange-300', 'bg-orange-500/20 text-orange-300');
+      case 'damage_charge': return getThemeClasses('bg-red-200/80 text-black border-red-300', 'bg-red-500/20 text-red-300');
+      case 'late_fee': return getThemeClasses('bg-purple-200/80 text-black border-purple-300', 'bg-purple-500/20 text-purple-300');
+      default: return getThemeClasses('bg-gray-200/80 text-black border-gray-300', 'bg-gray-500/20 text-gray-300');
     }
   };
 
@@ -301,7 +303,7 @@ export default function PaymentsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded px-3 py-2"
+            className="bg-white/10 border border-white/20 rounded px-4 py-2"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
@@ -314,7 +316,7 @@ export default function PaymentsPage() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded px-3 py-2"
+            className="bg-white/10 border border-white/20 rounded px-4 py-2"
           >
             <option value="">All Types</option>
             <option value="monthly_rent">Monthly Rent</option>
@@ -392,7 +394,7 @@ export default function PaymentsPage() {
                 required
                 icon={<FaRupeeSign />}
               />
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+
               <FormInput
                 type="date"
                 placeholder="Due Date *"

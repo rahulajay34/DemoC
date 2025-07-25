@@ -24,10 +24,26 @@ import {
   FaBicycle
 } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
   const [saving, setSaving] = useState(false);
+  const { getThemeClasses } = useTheme();
+  
+  const getActiveTabStyles = (isActive) => {
+    if (isActive) {
+      return getThemeClasses(
+        'bg-orange-200/80 text-black border border-orange-300',
+        'bg-orange-500/20 text-orange-300 border border-orange-500/30'
+      );
+    }
+    return getThemeClasses(
+      'text-gray-700 hover:bg-gray-100/50',
+      'text-gray-300 hover:bg-white/5'
+    );
+  };
+
   const [settings, setSettings] = useState({
     general: {
       companyName: "CheetahRide",
@@ -229,7 +245,7 @@ export default function SettingsPage() {
             type="text"
             value={settings.general.companyName}
             onChange={(e) => handleSettingChange('general', 'companyName', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
         
@@ -238,7 +254,7 @@ export default function SettingsPage() {
           <select
             value={settings.general.timezone}
             onChange={(e) => handleSettingChange('general', 'timezone', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
             <option value="America/New_York">America/New_York (EST)</option>
@@ -252,7 +268,7 @@ export default function SettingsPage() {
           <select
             value={settings.general.dateFormat}
             onChange={(e) => handleSettingChange('general', 'dateFormat', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="DD/MM/YYYY">DD/MM/YYYY</option>
             <option value="MM/DD/YYYY">MM/DD/YYYY</option>
@@ -265,7 +281,7 @@ export default function SettingsPage() {
           <select
             value={settings.general.currency}
             onChange={(e) => handleSettingChange('general', 'currency', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="INR">INR (₹)</option>
             <option value="USD">USD ($)</option>
@@ -279,7 +295,7 @@ export default function SettingsPage() {
           <select
             value={settings.general.language}
             onChange={(e) => handleSettingChange('general', 'language', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="en">English</option>
             <option value="hi">हिंदी</option>
@@ -293,7 +309,7 @@ export default function SettingsPage() {
           <select
             value={settings.general.theme}
             onChange={(e) => handleSettingChange('general', 'theme', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="dark">Dark</option>
             <option value="light">Light</option>
@@ -314,7 +330,7 @@ export default function SettingsPage() {
             min="1"
             value={settings.fleet.defaultRentalDuration}
             onChange={(e) => handleSettingChange('fleet', 'defaultRentalDuration', parseInt(e.target.value))}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
 
@@ -325,7 +341,7 @@ export default function SettingsPage() {
             min="0"
             value={settings.fleet.securityDepositAmount}
             onChange={(e) => handleSettingChange('fleet', 'securityDepositAmount', parseInt(e.target.value))}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
 
@@ -336,7 +352,7 @@ export default function SettingsPage() {
             min="0"
             value={settings.fleet.latePaymentFee}
             onChange={(e) => handleSettingChange('fleet', 'latePaymentFee', parseInt(e.target.value))}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
 
@@ -347,7 +363,7 @@ export default function SettingsPage() {
             min="1"
             value={settings.fleet.maintenanceInterval}
             onChange={(e) => handleSettingChange('fleet', 'maintenanceInterval', parseInt(e.target.value))}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
       </div>
@@ -406,7 +422,7 @@ export default function SettingsPage() {
             max="1440"
             value={settings.security.sessionTimeout}
             onChange={(e) => handleSettingChange('security', 'sessionTimeout', parseInt(e.target.value))}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
 
@@ -418,7 +434,7 @@ export default function SettingsPage() {
             max="365"
             value={settings.security.passwordExpiry}
             onChange={(e) => handleSettingChange('security', 'passwordExpiry', parseInt(e.target.value))}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
 
@@ -430,7 +446,7 @@ export default function SettingsPage() {
             max="10"
             value={settings.security.maxLoginAttempts}
             onChange={(e) => handleSettingChange('security', 'maxLoginAttempts', parseInt(e.target.value))}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
 
@@ -441,7 +457,7 @@ export default function SettingsPage() {
             placeholder="192.168.1.1, 10.0.0.1"
             value={settings.security.ipWhitelist}
             onChange={(e) => handleSettingChange('security', 'ipWhitelist', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
       </div>
@@ -488,7 +504,7 @@ export default function SettingsPage() {
           <select
             value={settings.system.backupFrequency}
             onChange={(e) => handleSettingChange('system', 'backupFrequency', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="hourly">Hourly</option>
             <option value="daily">Daily</option>
@@ -504,7 +520,7 @@ export default function SettingsPage() {
             min="30"
             value={settings.system.dataRetention}
             onChange={(e) => handleSettingChange('system', 'dataRetention', parseInt(e.target.value))}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
 
@@ -513,7 +529,7 @@ export default function SettingsPage() {
           <select
             value={settings.system.logLevel}
             onChange={(e) => handleSettingChange('system', 'logLevel', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="error">Error</option>
             <option value="warn">Warning</option>
@@ -529,7 +545,7 @@ export default function SettingsPage() {
             min="100"
             value={settings.system.apiRateLimit}
             onChange={(e) => handleSettingChange('system', 'apiRateLimit', parseInt(e.target.value))}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
 
@@ -541,7 +557,7 @@ export default function SettingsPage() {
             max="100"
             value={settings.system.maxFileSize}
             onChange={(e) => handleSettingChange('system', 'maxFileSize', parseInt(e.target.value))}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           />
         </div>
       </div>
@@ -578,7 +594,7 @@ export default function SettingsPage() {
           <select
             value={settings.integrations.smsGateway}
             onChange={(e) => handleSettingChange('integrations', 'smsGateway', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="twilio">Twilio</option>
             <option value="textlocal">TextLocal</option>
@@ -592,7 +608,7 @@ export default function SettingsPage() {
           <select
             value={settings.integrations.paymentGateway}
             onChange={(e) => handleSettingChange('integrations', 'paymentGateway', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="razorpay">Razorpay</option>
             <option value="stripe">Stripe</option>
@@ -606,7 +622,7 @@ export default function SettingsPage() {
           <select
             value={settings.integrations.emailService}
             onChange={(e) => handleSettingChange('integrations', 'emailService', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="sendgrid">SendGrid</option>
             <option value="mailgun">Mailgun</option>
@@ -620,7 +636,7 @@ export default function SettingsPage() {
           <select
             value={settings.integrations.cloudStorage}
             onChange={(e) => handleSettingChange('integrations', 'cloudStorage', e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-white"
+            className="w-full bg-white/10 border border-white/20 rounded px-4 py-2 text-white"
           >
             <option value="aws">AWS S3</option>
             <option value="gcp">Google Cloud</option>
@@ -719,11 +735,9 @@ export default function SettingsPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-all ${
+                className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-all ${getActiveTabStyles(
                   activeTab === tab.id
-                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
-                    : 'text-gray-300 hover:bg-white/5'
-                }`}
+                )}`}
               >
                 {tab.icon}
                 <span className="font-medium">{tab.label}</span>

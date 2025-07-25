@@ -50,10 +50,10 @@ export default function AlertsPage() {
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return getThemeClasses('bg-red-200/80 text-black border-red-300', 'bg-red-500/20 text-red-300 border-red-400/50');
-      case 'medium': return getThemeClasses('bg-amber-200/80 text-black border-amber-300', 'bg-amber-500/20 text-amber-300 border-amber-400/50');
-      case 'low': return getThemeClasses('bg-emerald-200/80 text-black border-emerald-300', 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50');
-      default: return getThemeClasses('bg-gray-200/80 text-black border-gray-300', 'bg-gray-500/20 text-gray-300 border-gray-400/50');
+      case 'high': return getThemeClasses('bg-red-200/80 text-red-800 border-red-300', 'bg-red-500/20 text-red-300 border-red-400/50');
+      case 'medium': return getThemeClasses('bg-amber-200/80 text-amber-800 border-amber-300', 'bg-amber-500/20 text-amber-300 border-amber-400/50');
+      case 'low': return getThemeClasses('bg-emerald-200/80 text-emerald-800 border-emerald-300', 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50');
+      default: return getThemeClasses('bg-gray-200/80 text-gray-700 border-gray-300', 'bg-gray-500/20 text-gray-300 border-gray-400/50');
     }
   };
 

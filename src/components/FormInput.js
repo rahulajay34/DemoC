@@ -1,6 +1,7 @@
 // src/components/FormInput.js
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 
 const FormInput = ({
   type = 'text',
@@ -17,8 +18,13 @@ const FormInput = ({
   ...props
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const { theme } = useTheme();
   
-  const baseClasses = `bg-white/10 border border-white/20 rounded px-3 py-2 transition-all duration-200 focus:border-orange-400/50 focus:outline-none focus:ring-2 focus:ring-orange-400/20 ${className}`;
+  // Dynamic base classes that account for icon presence
+  const getBaseClasses = () => {
+    const basePadding = icon ? 'pl-10 pr-4' : 'px-4';
+    return `${theme.colors.input} ${theme.colors.inputFocus} rounded-lg ${basePadding} py-2 transition-all duration-200 ${className}`;
+  };
 
   // Add asterisk to placeholder if required
   const displayPlaceholder = required && placeholder && !placeholder.includes('*') 
@@ -38,6 +44,14 @@ const FormInput = ({
     if (isValid) return 'success';
     if (isFocused) return 'focused';
     return 'idle';
+  };
+
+  // Get additional padding classes for validation icons
+  const getValidationPadding = () => {
+    if (isValid || hasError) {
+      return icon ? 'pr-10' : 'pr-10';
+    }
+    return '';
   };
 
   return (
@@ -62,7 +76,7 @@ const FormInput = ({
           onBlur={() => setIsFocused(false)}
           placeholder={displayPlaceholder}
           required={required}
-          className={`${baseClasses} ${icon ? 'pl-10' : ''} ${isValid ? 'pr-10' : ''} ${hasError ? 'pr-10 border-red-400/50' : ''}`}
+          className={`${getBaseClasses()} ${getValidationPadding()} ${hasError ? 'border-red-400/50' : ''}`}
           {...props}
         />
         

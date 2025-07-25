@@ -1,6 +1,9 @@
 import React from 'react';
+import { useTheme } from '@/context/ThemeContext';
 
 const CheetahLogo = ({ className }) => {
+  const { getThemeClasses } = useTheme();
+  
   return (
     <svg 
       width="100%" 
@@ -18,6 +21,13 @@ const CheetahLogo = ({ className }) => {
             font-size: 80px;
             fill: currentColor;
           }
+          [data-theme="light"] .lightning {
+            fill: #1f2937;
+            stroke: #374151;
+            stroke-width: 2px;
+            stroke-linejoin: round;
+          }
+          [data-theme="dark"] .lightning,
           .lightning {
             fill: #FFD700;
             stroke: #fff;

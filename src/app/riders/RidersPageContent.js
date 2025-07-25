@@ -2,8 +2,10 @@
 import { useState, useEffect, useRef } from "react";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function RidersPageContent({ initialRiders }) {
+  const { theme } = useTheme();
   const [riders, setRiders] = useState(initialRiders);
   const [filteredRiders, setFilteredRiders] = useState(initialRiders);
   const [searchActive, setSearchActive] = useState(false);
@@ -99,28 +101,28 @@ export default function RidersPageContent({ initialRiders }) {
             ref={nameRef}
             type="text"
             placeholder="Name"
-            className="bg-white/10 border border-white/20 rounded px-3 py-2 w-full sm:w-56"
+            className="bg-white/10 border border-white/20 rounded px-4 py-2 w-full sm:w-56"
             required
           />
           <input
             ref={emailRef}
             type="email"
             placeholder="Email *"
-            className="bg-white/10 border border-white/20 rounded px-3 py-2 w-full sm:w-56"
+            className="bg-white/10 border border-white/20 rounded px-4 py-2 w-full sm:w-56"
             required
           />
           <input
             ref={phoneRef}
             type="tel"
             placeholder="Phone *"
-            className="bg-white/10 border border-white/20 rounded px-3 py-2 w-full sm:w-44"
+            className="bg-white/10 border border-white/20 rounded px-4 py-2 w-full sm:w-44"
             required
           />
           <input
             ref={addrRef}
             type="text"
             placeholder="Address"
-            className="bg-white/10 border border-white/20 rounded px-3 py-2 w-full sm:w-80"
+            className="bg-white/10 border border-white/20 rounded px-4 py-2 w-full sm:w-80"
             required
           />
           <button

@@ -4,11 +4,13 @@ import SkeletonTable from "@/components/SkeletonTable";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { FaSearch, FaTimes, FaPlus, FaEdit, FaTrash, FaUser, FaMotorcycle, FaRupeeSign, FaCalendarAlt } from "react-icons/fa";
+import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/context/ToastContext";
 import FormInput from "@/components/FormInput";
 import FormSelect from "@/components/FormSelect";
 
 export default function AssignmentsPage() {
+  const { theme, getThemeClasses } = useTheme();
   const [assignments, setAssignments] = useState([]);
   const [riders, setRiders] = useState([]);
   const [bikes, setBikes] = useState([]);
@@ -25,6 +27,15 @@ export default function AssignmentsPage() {
   const [editingAssignment, setEditingAssignment] = useState(null);
 
   const { toast } = useToast();
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'active': return getThemeClasses('bg-emerald-200/80 text-black border-emerald-300', 'bg-green-500/20 text-green-300');
+      case 'completed': return getThemeClasses('bg-blue-200/80 text-black border-blue-300', 'bg-blue-500/20 text-blue-300');
+      case 'terminated': return getThemeClasses('bg-red-200/80 text-black border-red-300', 'bg-red-500/20 text-red-300');
+      default: return getThemeClasses('bg-amber-200/80 text-black border-amber-300', 'bg-yellow-500/20 text-yellow-300');
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -457,15 +468,7 @@ export default function AssignmentsPage() {
                       <td className="px-4 py-3">₹{a.monthlyCharge}</td>
                       <td className="px-4 py-3">
                         <span
-                          className={`text-xs font-medium px-2 py-1 rounded-full ${
-                            a.status === "active"
-                              ? "bg-green-500/20 text-green-300"
-                              : a.status === "completed"
-                              ? "bg-blue-500/20 text-blue-300"
-                              : a.status === "terminated"
-                              ? "bg-red-500/20 text-red-300"
-                              : "bg-yellow-500/20 text-yellow-300"
-                          }`}
+                          className={`text-xs font-medium px-2 py-1 rounded-full border ${getStatusColor(a.status || 'active')}`}
                         >
                           {a.status || 'active'}
                         </span>

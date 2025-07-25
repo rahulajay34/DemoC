@@ -1,5 +1,6 @@
 // src/components/FormTextarea.js
 import React from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 const FormTextarea = ({
   value,
@@ -8,9 +9,16 @@ const FormTextarea = ({
   required = false,
   rows = 3,
   className = '',
+  icon,
   ...props
 }) => {
-  const baseClasses = `bg-white/10 border border-white/20 rounded px-3 py-2 transition-all duration-200 focus:border-orange-400/50 focus:outline-none focus:ring-2 focus:ring-orange-400/20 resize-vertical ${className}`;
+  const { theme } = useTheme();
+  
+  // Dynamic base classes that account for icon presence
+  const getBaseClasses = () => {
+    const basePadding = icon ? 'pl-10 pr-4' : 'px-4';
+    return `${theme.colors.input} ${theme.colors.inputFocus} rounded-lg ${basePadding} py-2 transition-all duration-200 resize-vertical ${className}`;
+  };
 
   // Add asterisk to placeholder if required
   const displayPlaceholder = required && placeholder && !placeholder.includes('*') 
@@ -20,13 +28,18 @@ const FormTextarea = ({
   return (
     <div className="relative">
       <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-3 text-white/60 z-10">
+            {icon}
+          </div>
+        )}
         <textarea
           value={value}
           onChange={onChange}
           placeholder={displayPlaceholder}
           rows={rows}
           required={required}
-          className={baseClasses}
+          className={getBaseClasses()}
           {...props}
         />
       </div>

@@ -22,10 +22,12 @@ import {
   FaCheckCircle,
   FaExclamationTriangle
 } from "react-icons/fa";
+import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/context/ToastContext";
 import SkeletonTable from "@/components/SkeletonTable";
 
 export default function ReportsPage() {
+  const { theme, getThemeClasses } = useTheme();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchActive, setSearchActive] = useState(false);
@@ -219,10 +221,10 @@ export default function ReportsPage() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return 'bg-green-500/20 text-green-300';
-      case 'generating': return 'bg-yellow-500/20 text-yellow-300';
-      case 'failed': return 'bg-red-500/20 text-red-300';
-      default: return 'bg-gray-500/20 text-gray-300';
+      case 'completed': return getThemeClasses('bg-green-200/80 text-black border-green-300', 'bg-green-500/20 text-green-300');
+      case 'generating': return getThemeClasses('bg-yellow-200/80 text-black border-yellow-300', 'bg-yellow-500/20 text-yellow-300');
+      case 'failed': return getThemeClasses('bg-red-200/80 text-black border-red-300', 'bg-red-500/20 text-red-300');
+      default: return getThemeClasses('bg-gray-200/80 text-black border-gray-300', 'bg-gray-500/20 text-gray-300');
     }
   };
 
@@ -315,7 +317,7 @@ export default function ReportsPage() {
         <select
           value={reportType}
           onChange={(e) => setReportType(e.target.value)}
-          className="bg-white/10 border border-white/20 rounded px-3 py-2"
+          className="bg-white/10 border border-white/20 rounded px-4 py-2"
         >
           <option value="all">All Types</option>
           <option value="revenue">Revenue Reports</option>
@@ -328,13 +330,13 @@ export default function ReportsPage() {
           type="date"
           value={dateRange.startDate}
           onChange={(e) => setDateRange(prev => ({...prev, startDate: e.target.value}))}
-          className="bg-white/10 border border-white/20 rounded px-3 py-2"
+          className="bg-white/10 border border-white/20 rounded px-4 py-2"
         />
         <input
           type="date"
           value={dateRange.endDate}
           onChange={(e) => setDateRange(prev => ({...prev, endDate: e.target.value}))}
-          className="bg-white/10 border border-white/20 rounded px-3 py-2"
+          className="bg-white/10 border border-white/20 rounded px-4 py-2"
         />
       </div>
 
@@ -351,7 +353,7 @@ export default function ReportsPage() {
               <select
                 value={newReportType}
                 onChange={(e) => setNewReportType(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className="bg-white/10 border border-white/20 rounded px-4 py-2"
                 required
               >
                 <option value="revenue">Revenue Report</option>
@@ -363,7 +365,7 @@ export default function ReportsPage() {
               <select
                 value={newReportFormat}
                 onChange={(e) => setNewReportFormat(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className="bg-white/10 border border-white/20 rounded px-4 py-2"
               >
                 <option value="pdf">PDF</option>
                 <option value="excel">Excel</option>
@@ -374,7 +376,7 @@ export default function ReportsPage() {
                 type="date"
                 value={newReportRange.startDate}
                 onChange={(e) => setNewReportRange(prev => ({...prev, startDate: e.target.value}))}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className="bg-white/10 border border-white/20 rounded px-4 py-2"
                 required
               />
 
@@ -382,7 +384,7 @@ export default function ReportsPage() {
                 type="date"
                 value={newReportRange.endDate}
                 onChange={(e) => setNewReportRange(prev => ({...prev, endDate: e.target.value}))}
-                className="bg-white/10 border border-white/20 rounded px-3 py-2"
+                className="bg-white/10 border border-white/20 rounded px-4 py-2"
                 required
               />
             </div>
@@ -477,7 +479,7 @@ export default function ReportsPage() {
                 </button>
                 <button
                   onClick={() => toast.info("🖨️ Print functionality coming soon!")}
-                  className="bg-gray-600 hover:bg-gray-700 px-3 py-2 rounded"
+                  className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded"
                 >
                   <FaPrint size={14} />
                 </button>

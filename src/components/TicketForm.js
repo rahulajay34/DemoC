@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
 import { useToast } from "@/context/ToastContext";
+import { FaTicketAlt, FaEdit, FaList, FaFlag, FaUser, FaTags } from "react-icons/fa";
+import FormInput from "@/components/FormInput";
+import FormSelect from "@/components/FormSelect";
+import FormTextarea from "@/components/FormTextarea";
 
 export default function TicketForm({ onTicketCreated, onClose, riders = [] }) {
   const [formData, setFormData] = useState({
@@ -73,126 +77,80 @@ export default function TicketForm({ onTicketCreated, onClose, riders = [] }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-          Title *
-        </label>
-        <input
-          type="text"
-          id="title"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          required
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-          placeholder="Enter ticket title"
-        />
-      </div>
+      <FormInput
+        type="text"
+        name="title"
+        value={formData.title}
+        onChange={handleChange}
+        placeholder="Enter ticket title *"
+        required
+        icon={<FaTicketAlt />}
+      />
 
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-          Description *
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          required
-          rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-          placeholder="Describe the issue or request"
-        />
-      </div>
+      <FormTextarea
+        name="description"
+        value={formData.description}
+        onChange={handleChange}
+        placeholder="Describe the issue or request *"
+        required
+        rows={4}
+        icon={<FaEdit />}
+      />
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-            Category
-          </label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-800"
-            style={{ 
-              color: '#1f2937',
-              backgroundColor: 'white'
-            }}
-          >
-            <option value="general" style={{ color: '#1f2937', backgroundColor: 'white' }}>General</option>
-            <option value="technical" style={{ color: '#1f2937', backgroundColor: 'white' }}>Technical</option>
-            <option value="billing" style={{ color: '#1f2937', backgroundColor: 'white' }}>Billing</option>
-            <option value="maintenance" style={{ color: '#1f2937', backgroundColor: 'white' }}>Maintenance</option>
-            <option value="complaint" style={{ color: '#1f2937', backgroundColor: 'white' }}>Complaint</option>
-            <option value="suggestion" style={{ color: '#1f2937', backgroundColor: 'white' }}>Suggestion</option>
-          </select>
-        </div>
+        <FormSelect
+          name="category"
+          value={formData.category}
+          onChange={handleChange}
+          placeholder="Select Category"
+          options={[
+            { value: "general", label: "General" },
+            { value: "technical", label: "Technical" },
+            { value: "billing", label: "Billing" },
+            { value: "maintenance", label: "Maintenance" },
+            { value: "complaint", label: "Complaint" },
+            { value: "suggestion", label: "Suggestion" }
+          ]}
+          icon={<FaList />}
+        />
 
-        <div>
-          <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
-            Priority
-          </label>
-          <select
-            id="priority"
-            name="priority"
-            value={formData.priority}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-800"
-            style={{ 
-              color: '#1f2937',
-              backgroundColor: 'white'
-            }}
-          >
-            <option value="low" style={{ color: '#1f2937', backgroundColor: 'white' }}>Low</option>
-            <option value="medium" style={{ color: '#1f2937', backgroundColor: 'white' }}>Medium</option>
-            <option value="high" style={{ color: '#1f2937', backgroundColor: 'white' }}>High</option>
-            <option value="urgent" style={{ color: '#1f2937', backgroundColor: 'white' }}>Urgent</option>
-          </select>
-        </div>
+        <FormSelect
+          name="priority"
+          value={formData.priority}
+          onChange={handleChange}
+          placeholder="Select Priority"
+          options={[
+            { value: "low", label: "Low" },
+            { value: "medium", label: "Medium" },
+            { value: "high", label: "High" },
+            { value: "urgent", label: "Urgent" }
+          ]}
+          icon={<FaFlag />}
+        />
       </div>
 
       {riders && riders.length > 0 && (
-        <div>
-          <label htmlFor="riderId" className="block text-sm font-medium text-gray-700 mb-1">
-            Assign to Rider (Optional)
-          </label>
-          <select
-            id="riderId"
-            name="riderId"
-            value={formData.riderId}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-800"
-            style={{ 
-              color: '#1f2937',
-              backgroundColor: 'white'
-            }}
-          >
-            <option value="" style={{ color: '#1f2937', backgroundColor: 'white' }}>Select a rider (optional)</option>
-            {riders.map(rider => (
-              <option key={rider._id} value={rider._id} style={{ color: '#1f2937', backgroundColor: 'white' }}>
-                {rider.name} - {rider.email}
-              </option>
-            ))}
-          </select>
-        </div>
+        <FormSelect
+          name="riderId"
+          value={formData.riderId}
+          onChange={handleChange}
+          placeholder="Assign to Rider (Optional)"
+          options={riders.map(rider => ({
+            value: rider._id,
+            label: `${rider.name} - ${rider.email}`
+          }))}
+          icon={<FaUser />}
+        />
       )}
 
-      <div>
-        <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
-          Tags (comma-separated)
-        </label>
-        <input
-          type="text"
-          id="tags"
-          name="tags"
-          value={formData.tags}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-          placeholder="urgent, billing, refund"
-        />
-      </div>
+      <FormInput
+        type="text"
+        name="tags"
+        value={formData.tags}
+        onChange={handleChange}
+        placeholder="Tags (comma-separated, e.g., urgent, billing, refund)"
+        icon={<FaTags />}
+      />
 
       <div className="flex justify-end space-x-3">
         {onClose && (

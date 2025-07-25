@@ -3,10 +3,12 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 import CheetahLogo from "../../components/CheetahLogo"; // Import the new component
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { theme, getThemeClasses } = useTheme();
   const router = useRouter();
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +35,7 @@ export default function LoginPage() {
           className="flex flex-col items-center gap-4"
         >
           <CheetahLogo className="w-[355px] h-[90px] text-white drop-shadow-lg" />
-          <p className="text-white/80 text-center text-lg">
+          <p className={`${getThemeClasses("text-white/90", "text-white/80")} text-center text-lg font-medium`}>
             Admin Dashboard
           </p>
         </motion.div>
@@ -49,7 +51,7 @@ export default function LoginPage() {
           className="glass-card p-8 md:p-10 flex flex-col gap-6 w-full max-w-sm"
         >
           <div className="card-content">
-            <h2 className="text-3xl font-bold text-center text-white mb-4">
+            <h2 className={`text-3xl font-bold text-center ${theme.colors.textPrimary} mb-4`}>
               Admin Login
             </h2>
             <input
@@ -57,23 +59,23 @@ export default function LoginPage() {
               placeholder="Admin ID"
               value={id}
               onChange={(e) => setId(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+              className={`w-full ${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2 placeholder:font-medium transition-all duration-300`}
             />
             <input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+              className={`w-full ${theme.colors.input} ${theme.colors.inputFocus} rounded-lg px-4 py-2 placeholder:font-medium transition-all duration-300`}
             />
             <button
               type="submit"
-              className="cheetah-gradient-btn text-center w-full py-3 mt-2 text-lg"
+              className="cheetah-gradient-btn text-center w-full py-3 mt-2 text-lg font-semibold"
             >
               Log In
             </button>
             {error && (
-              <p className="text-red-400 text-center text-sm mt-4">{error}</p>
+              <p className={`${getThemeClasses("text-red-600", "text-red-400")} text-center text-sm mt-4 font-medium`}>{error}</p>
             )}
           </div>
         </motion.form>

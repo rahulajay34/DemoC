@@ -1,5 +1,6 @@
 // src/components/FormSelect.js
 import React from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 const FormSelect = ({
   value,
@@ -11,7 +12,13 @@ const FormSelect = ({
   icon,
   ...props
 }) => {
-  const baseClasses = `bg-white/10 border border-white/20 rounded px-3 py-2 transition-all duration-200 focus:border-orange-400/50 focus:outline-none focus:ring-2 focus:ring-orange-400/20 text-white ${className}`;
+  const { theme } = useTheme();
+  
+  // Dynamic base classes that account for icon presence
+  const getBaseClasses = () => {
+    const basePadding = icon ? 'pl-10 pr-4' : 'px-4';
+    return `${theme.colors.input} ${theme.colors.inputFocus} rounded-lg ${basePadding} py-2 transition-all duration-200 ${className}`;
+  };
 
   // Add asterisk to placeholder if required
   const displayPlaceholder = required && !placeholder.includes('*') 
@@ -22,7 +29,7 @@ const FormSelect = ({
     <div className="relative">
       <div className="relative">
         {icon && (
-          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 z-10">
             {icon}
           </div>
         )}
@@ -30,22 +37,16 @@ const FormSelect = ({
           value={value}
           onChange={onChange}
           required={required}
-          className={`${baseClasses} ${icon ? 'pl-10' : ''}`}
-          style={{
-            color: 'white',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            borderColor: 'rgba(255, 255, 255, 0.2)'
-          }}
+          className={getBaseClasses()}
           {...props}
         >
-          <option value="" style={{ color: '#1f2937', backgroundColor: 'white' }}>
+          <option value="">
             {displayPlaceholder}
           </option>
           {options.map((option, index) => (
             <option 
               key={index} 
-              value={option.value} 
-              style={{ color: '#1f2937', backgroundColor: 'white' }}
+              value={option.value}
             >
               {option.label}
             </option>

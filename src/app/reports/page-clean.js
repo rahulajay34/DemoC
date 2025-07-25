@@ -62,10 +62,10 @@ export default function ReportsPage() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return getThemeClasses('bg-emerald-200/80 text-black border-emerald-300', 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50');
-      case 'generating': return getThemeClasses('bg-blue-200/80 text-black border-blue-300', 'bg-blue-500/20 text-blue-300 border-blue-400/50');
-      case 'failed': return getThemeClasses('bg-red-200/80 text-black border-red-300', 'bg-red-500/20 text-red-300 border-red-400/50');
-      default: return getThemeClasses('bg-gray-200/80 text-black border-gray-300', 'bg-gray-500/20 text-gray-300 border-gray-400/50');
+      case 'completed': return getThemeClasses('bg-emerald-200/80 text-emerald-800 border-emerald-300', 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50');
+      case 'generating': return getThemeClasses('bg-blue-200/80 text-blue-800 border-blue-300', 'bg-blue-500/20 text-blue-300 border-blue-400/50');
+      case 'failed': return getThemeClasses('bg-red-200/80 text-red-800 border-red-300', 'bg-red-500/20 text-red-300 border-red-400/50');
+      default: return getThemeClasses('bg-gray-200/80 text-gray-700 border-gray-300', 'bg-gray-500/20 text-gray-300 border-gray-400/50');
     }
   };
 
@@ -242,7 +242,7 @@ export default function ReportsPage() {
         <select
           value={reportType}
           onChange={(e) => setReportType(e.target.value)}
-          className={`${getCardStyles()} border rounded px-4 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
+          className={`${getCardStyles()} border rounded px-3 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
         >
           <option value="all">All Reports</option>
           <option value="revenue">Revenue</option>
@@ -255,14 +255,14 @@ export default function ReportsPage() {
           type="date"
           value={dateRange.startDate}
           onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
-          className={`${getCardStyles()} border rounded px-4 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
+          className={`${getCardStyles()} border rounded px-3 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
         />
 
         <input
           type="date"
           value={dateRange.endDate}
           onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
-          className={`${getCardStyles()} border rounded px-4 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
+          className={`${getCardStyles()} border rounded px-3 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
         />
 
         {/* Mobile Generate Button */}
@@ -381,7 +381,7 @@ export default function ReportsPage() {
                 <select
                   value={newReportType}
                   onChange={(e) => setNewReportType(e.target.value)}
-                  className={`w-full ${getCardStyles()} border rounded px-4 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
+                  className={`w-full ${getCardStyles()} border rounded px-3 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
                 >
                   <option value="revenue">Revenue Report</option>
                   <option value="fleet">Fleet Report</option>
@@ -395,7 +395,7 @@ export default function ReportsPage() {
                 <select
                   value={newReportFormat}
                   onChange={(e) => setNewReportFormat(e.target.value)}
-                  className={`w-full ${getCardStyles()} border rounded px-4 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
+                  className={`w-full ${getCardStyles()} border rounded px-3 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
                 >
                   <option value="pdf">PDF</option>
                   <option value="excel">Excel</option>
@@ -410,7 +410,7 @@ export default function ReportsPage() {
                     type="date"
                     value={newReportRange.startDate}
                     onChange={(e) => setNewReportRange(prev => ({ ...prev, startDate: e.target.value }))}
-                    className={`w-full ${getCardStyles()} border rounded px-4 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
+                    className={`w-full ${getCardStyles()} border rounded px-3 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
                   />
                 </div>
                 <div>
@@ -419,7 +419,7 @@ export default function ReportsPage() {
                     type="date"
                     value={newReportRange.endDate}
                     onChange={(e) => setNewReportRange(prev => ({ ...prev, endDate: e.target.value }))}
-                    className={`w-full ${getCardStyles()} border rounded px-4 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
+                    className={`w-full ${getCardStyles()} border rounded px-3 py-2 ${theme.colors.textPrimary} backdrop-blur-sm`}
                   />
                 </div>
               </div>

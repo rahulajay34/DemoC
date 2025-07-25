@@ -21,9 +21,11 @@ import {
   FaChartLine
 } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
+import { useTheme } from "@/context/ThemeContext";
 import SkeletonTable from "@/components/SkeletonTable";
 
 export default function TrackingPage() {
+  const { theme, getThemeClasses } = useTheme();
   const [assignments, setAssignments] = useState([]);
   const [riders, setRiders] = useState([]);
   const [bikes, setBikes] = useState([]);
@@ -123,12 +125,12 @@ export default function TrackingPage() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'active': return 'bg-green-500/20 text-green-300';
-      case 'moving': return 'bg-blue-500/20 text-blue-300';
-      case 'parked': return 'bg-yellow-500/20 text-yellow-300';
-      case 'idle': return 'bg-gray-500/20 text-gray-300';
-      case 'maintenance': return 'bg-red-500/20 text-red-300';
-      default: return 'bg-gray-500/20 text-gray-300';
+      case 'active': return getThemeClasses('bg-emerald-200/80 text-black', 'bg-green-500/20 text-green-300');
+      case 'moving': return getThemeClasses('bg-blue-200/80 text-black', 'bg-blue-500/20 text-blue-300');
+      case 'parked': return getThemeClasses('bg-amber-200/80 text-black', 'bg-yellow-500/20 text-yellow-300');
+      case 'idle': return getThemeClasses('bg-gray-200/80 text-black', 'bg-gray-500/20 text-gray-300');
+      case 'maintenance': return getThemeClasses('bg-red-200/80 text-black', 'bg-red-500/20 text-red-300');
+      default: return getThemeClasses('bg-gray-200/80 text-black', 'bg-gray-500/20 text-gray-300');
     }
   };
 
@@ -233,7 +235,7 @@ export default function TrackingPage() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-white/10 border border-white/20 rounded px-3 py-2"
+          className="bg-white/10 border border-white/20 rounded px-4 py-2"
         >
           <option value="all">All Status</option>
           <option value="active">Active</option>
@@ -337,13 +339,13 @@ export default function TrackingPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center">
-                        <div className="w-16 bg-gray-700 rounded-full h-2 mr-2">
+                        <div className={`w-16 ${getThemeClasses('bg-slate-300', 'bg-slate-700')} rounded-full h-2 mr-2`}>
                           <div 
-                            className="bg-green-500 h-2 rounded-full" 
+                            className={`${getThemeClasses('bg-emerald-600', 'bg-green-500')} h-2 rounded-full`} 
                             style={{ width: `${assignment.trackingData?.batteryLevel || 0}%` }}
                           />
                         </div>
-                        <span className="text-xs text-white">{assignment.trackingData?.batteryLevel || 0}%</span>
+                        <span className={`text-xs ${getThemeClasses('text-slate-700', 'text-white')}`}>{assignment.trackingData?.batteryLevel || 0}%</span>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-white">{assignment.trackingData?.todayDistance || 0} km</td>
@@ -415,33 +417,33 @@ export default function TrackingPage() {
               </div>
               
               <div>
-                <h4 className="text-sm font-medium text-gray-400 mb-2">Current Status</h4>
+                <h4 className={`text-sm font-medium ${getThemeClasses('text-slate-600', 'text-gray-400')} mb-2`}>Current Status</h4>
                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${getStatusColor(selectedTracking.trackingData?.status)}`}>
                   {selectedTracking.trackingData?.status}
                 </span>
               </div>
               
               <div>
-                <h4 className="text-sm font-medium text-gray-400 mb-2">Location</h4>
-                <p className="text-white text-sm">{selectedTracking.trackingData?.currentLocation?.address}</p>
+                <h4 className={`text-sm font-medium ${getThemeClasses('text-slate-600', 'text-gray-400')} mb-2`}>Location</h4>
+                <p className={`${getThemeClasses('text-slate-900', 'text-white')} text-sm`}>{selectedTracking.trackingData?.currentLocation?.address}</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h5 className="text-xs text-gray-400">Speed</h5>
-                  <p className="text-white">{selectedTracking.trackingData?.speed} km/h</p>
+                  <h5 className={`text-xs ${getThemeClasses('text-slate-600', 'text-gray-400')}`}>Speed</h5>
+                  <p className={getThemeClasses('text-slate-900', 'text-white')}>{selectedTracking.trackingData?.speed} km/h</p>
                 </div>
                 <div>
-                  <h5 className="text-xs text-gray-400">Battery</h5>
-                  <p className="text-white">{selectedTracking.trackingData?.batteryLevel}%</p>
+                  <h5 className={`text-xs ${getThemeClasses('text-slate-600', 'text-gray-400')}`}>Battery</h5>
+                  <p className={getThemeClasses('text-slate-900', 'text-white')}>{selectedTracking.trackingData?.batteryLevel}%</p>
                 </div>
                 <div>
-                  <h5 className="text-xs text-gray-400">Today Distance</h5>
-                  <p className="text-white">{selectedTracking.trackingData?.todayDistance} km</p>
+                  <h5 className={`text-xs ${getThemeClasses('text-slate-600', 'text-gray-400')}`}>Today Distance</h5>
+                  <p className={getThemeClasses('text-slate-900', 'text-white')}>{selectedTracking.trackingData?.todayDistance} km</p>
                 </div>
                 <div>
-                  <h5 className="text-xs text-gray-400">Ride Time</h5>
-                  <p className="text-white">{Math.floor((selectedTracking.trackingData?.rideTime || 0) / 60)}h {(selectedTracking.trackingData?.rideTime || 0) % 60}m</p>
+                  <h5 className={`text-xs ${getThemeClasses('text-slate-600', 'text-gray-400')}`}>Ride Time</h5>
+                  <p className={getThemeClasses('text-slate-900', 'text-white')}>{Math.floor((selectedTracking.trackingData?.rideTime || 0) / 60)}h {(selectedTracking.trackingData?.rideTime || 0) % 60}m</p>
                 </div>
               </div>
             </div>

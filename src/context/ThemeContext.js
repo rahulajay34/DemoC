@@ -16,71 +16,71 @@ export const themes = {
   light: {
     name: "light",
     colors: {
-      // Background colors with better contrast for light mode
-      primary: "bg-gray-50", // Main background - soft neutral
-      secondary: "bg-white", // Card/container background - pure white
-      tertiary: "bg-gray-100", // Subtle background - light gray
-      accent: "bg-gradient-to-r from-orange-500 to-red-500", // Enhanced brand accent
+      // Background colors with sophisticated elegance and enhanced majestic depth
+      primary: "bg-gradient-to-br from-slate-100 via-indigo-50/90 to-violet-50/70", // Richer background with more pronounced gradient
+      secondary: "bg-white/95 backdrop-blur-3xl", // Enhanced glass effect with more blur
+      tertiary: "bg-slate-50/90", // Improved subtle background
+      accent: "bg-gradient-to-r from-orange-500 via-red-500 to-pink-500", // Enhanced vibrant brand accent
       accentSolid: "bg-orange-500", // Solid accent for simple cases
       
-      // Text colors with improved readability
-      textPrimary: "text-gray-900", // Main text - very dark for high contrast
-      textSecondary: "text-gray-700", // Secondary text
-      textMuted: "text-gray-500", // Muted text
+      // Text colors with premium contrast and majestic hierarchy - Enhanced for better contrast
+      textPrimary: "text-slate-950", // Even deeper, more authoritative text
+      textSecondary: "text-slate-800", // Stronger secondary text for better contrast
+      textMuted: "text-slate-600", // Enhanced muted text with better visibility
       textInverse: "text-white", // Text on dark backgrounds
-      textAccent: "text-orange-600", // Accent text color
+      textAccent: "text-orange-700", // Deeper accent text for elegance
       
-      // Border colors with better definition
-      borderPrimary: "border-gray-200",
-      borderSecondary: "border-gray-300",
-      borderAccent: "border-orange-500",
-      borderMuted: "border-gray-100",
+      // Border colors with refined elegance and majestic depth
+      borderPrimary: "border-slate-300/90", // More defined primary borders
+      borderSecondary: "border-slate-400/70", // Enhanced secondary borders
+      borderAccent: "border-orange-500/80", // Stronger accent borders
+      borderMuted: "border-slate-200/80", // Improved muted borders
       
-      // Status colors with better visibility
-      success: "text-green-700",
-      warning: "text-amber-700",
-      error: "text-red-700",
-      info: "text-blue-700",
+      // Status colors with enhanced vibrancy and better visibility for light mode
+      success: "text-emerald-900", // Even deeper for better visibility
+      warning: "text-amber-900", // Richer warning color
+      error: "text-red-900", // Stronger error indication
+      info: "text-blue-900", // Deeper info color
       
-      // Background status colors with better contrast
-      successBg: "bg-green-50 border-green-200",
-      warningBg: "bg-amber-50 border-amber-200",
-      errorBg: "bg-red-50 border-red-200",
-      infoBg: "bg-blue-50 border-blue-200",
+      // Background status colors with enhanced contrast and visibility
+      successBg: "bg-gradient-to-r from-emerald-200/90 to-teal-200/80 border-emerald-400/90 text-emerald-900",
+      warningBg: "bg-gradient-to-r from-amber-200/90 to-orange-200/80 border-amber-400/90 text-amber-900",
+      errorBg: "bg-gradient-to-r from-red-200/90 to-rose-200/80 border-red-400/90 text-red-900",
+      infoBg: "bg-gradient-to-r from-blue-200/90 to-sky-200/80 border-blue-400/90 text-blue-900",
       
-      // Interactive elements with enhanced visibility
-      buttonPrimary: "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200",
-      buttonSecondary: "bg-white hover:bg-gray-50 text-gray-800 border-2 border-gray-300 hover:border-gray-400 shadow-sm hover:shadow-md transition-all duration-200",
-      buttonGhost: "bg-transparent hover:bg-gray-100 text-gray-700 hover:text-gray-900 border border-transparent hover:border-gray-300 transition-all duration-200",
-      buttonDanger: "bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200",
-      buttonSuccess: "bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200",
+      // Interactive elements with premium feel and majestic sophistication
+      buttonPrimary: "bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 hover:from-orange-700 hover:via-red-700 hover:to-pink-700 text-white shadow-2xl hover:shadow-orange-500/40 transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 backdrop-blur-sm ring-1 ring-orange-500/30",
+      buttonSecondary: "bg-white/95 backdrop-blur-2xl hover:bg-white text-slate-900 border-2 border-slate-400/80 hover:border-orange-600/60 shadow-xl hover:shadow-2xl hover:shadow-orange-500/20 transform hover:-translate-y-0.5 transition-all duration-300 ring-1 ring-slate-300/50",
+      buttonGhost: "bg-transparent hover:bg-slate-100/80 backdrop-blur-sm text-slate-800 hover:text-slate-900 border border-transparent hover:border-slate-400/60 hover:shadow-lg transition-all duration-300",
+      buttonDanger: "bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-2xl hover:shadow-red-500/40 transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 ring-1 ring-red-500/30",
+      buttonSuccess: "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-2xl hover:shadow-emerald-500/40 transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 ring-1 ring-emerald-500/30",
       
-      // Form elements with better contrast
-      input: "bg-white border-gray-300 text-gray-900 placeholder-gray-400 shadow-sm",
-      inputFocus: "focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:outline-none",
-      inputError: "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20",
+      // Form elements with premium glassmorphism and majestic elegance
+      input: "bg-white/85 backdrop-blur-2xl border-slate-400/70 text-slate-900 placeholder-slate-500 shadow-xl ring-1 ring-slate-300/50",
+      inputFocus: "focus:border-orange-600/80 focus:ring-4 focus:ring-orange-500/20 focus:outline-none focus:bg-white/95 focus:shadow-2xl focus:shadow-orange-500/10",
+      inputError: "border-red-500/80 focus:border-red-600/80 focus:ring-4 focus:ring-red-500/20 focus:bg-red-50/80 ring-1 ring-red-300/50",
       
-      // Sidebar and navigation with solid backgrounds
-      sidebarBg: "bg-white border-r border-gray-200 shadow-sm",
-      sidebarText: "text-gray-600",
-      sidebarActive: "bg-orange-50 text-orange-700 border-r-2 border-orange-500",
-      sidebarHover: "hover:bg-gray-50 hover:text-gray-900 transition-all duration-200",
+      // Sidebar and navigation with premium glassmorphism and enhanced depth
+      sidebarBg: "bg-white/95 backdrop-blur-3xl border-r border-slate-300/90 shadow-2xl shadow-slate-900/12",
+      sidebarText: "text-slate-800", // Deeper text for better contrast
+      sidebarActive: "bg-gradient-to-r from-orange-500/25 via-red-500/20 to-pink-500/15 text-orange-800 border-r-4 border-orange-700/90 shadow-xl shadow-orange-500/20 backdrop-blur-xl font-semibold",
+      sidebarHover: "hover:bg-slate-100/80 hover:text-slate-900 hover:shadow-lg transition-all duration-300 backdrop-blur-sm",
       
-      // Cards and panels with solid backgrounds instead of glass
-      cardBg: "bg-white",
-      cardShadow: "shadow-lg hover:shadow-xl transition-shadow duration-300",
-      cardBorder: "border border-gray-200",
-      cardHover: "hover:shadow-2xl hover:-translate-y-1 transition-all duration-300",
+      // Cards and panels with premium glassmorphism effects and majestic presence
+      cardBg: "bg-white/85 backdrop-blur-3xl",
+      cardShadow: "shadow-2xl shadow-slate-900/12 hover:shadow-3xl hover:shadow-slate-900/16 transition-all duration-500",
+      cardBorder: "border border-slate-300/60 ring-1 ring-slate-200/80",
+      cardHover: "hover:shadow-2xl hover:shadow-orange-500/15 hover:-translate-y-2 hover:scale-[1.02] hover:bg-white/95 transition-all duration-500 hover:border-orange-500/30",
       
-      // Glass effect minimized for light theme
-      glass: "bg-white/95 backdrop-blur-sm border-gray-200/50 shadow-lg",
-      glassBorder: "border border-gray-200/30",
+      // Enhanced glass effect optimized for light theme majestic elegance
+      glass: "bg-white/80 backdrop-blur-3xl border-slate-300/50 shadow-2xl shadow-slate-900/15 ring-1 ring-slate-300/60",
+      glassBorder: "border border-slate-300/70 ring-1 ring-slate-200/50",
       
-      // Additional utility colors with better contrast
-      divider: "border-gray-200",
-      overlay: "bg-gray-900/20",
-      surface: "bg-gray-50",
-      surfaceHover: "hover:bg-gray-100",
+      // Additional utility colors with premium majestic feel
+      divider: "border-slate-300/80",
+      overlay: "bg-slate-900/30 backdrop-blur-sm",
+      surface: "bg-slate-100/90 backdrop-blur-sm",
+      surfaceHover: "hover:bg-white/80 hover:backdrop-blur-lg hover:shadow-xl",
     }
   },
   dark: {

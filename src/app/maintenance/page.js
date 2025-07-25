@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { FaWrench, FaPlus, FaSearch, FaTimes, FaEdit, FaTrash, FaEye, FaMotorcycle, FaCog, FaCalendarAlt, FaRupeeSign, FaClock } from "react-icons/fa";
+import { useTheme } from "@/context/ThemeContext";
 import { useToast } from "@/context/ToastContext";
 import SkeletonTable from "@/components/SkeletonTable";
 import FormInput from "@/components/FormInput";
@@ -8,6 +9,7 @@ import FormSelect from "@/components/FormSelect";
 import FormTextarea from "@/components/FormTextarea";
 
 export default function MaintenancePage() {
+  const { theme, getThemeClasses } = useTheme();
   const [maintenanceRecords, setMaintenanceRecords] = useState([]);
   const [bikes, setBikes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -243,22 +245,22 @@ export default function MaintenancePage() {
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'critical': return 'bg-red-500/20 text-red-300';
-      case 'high': return 'bg-orange-500/20 text-orange-300';
-      case 'medium': return 'bg-yellow-500/20 text-yellow-300';
-      case 'low': return 'bg-green-500/20 text-green-300';
-      default: return 'bg-gray-500/20 text-gray-300';
+      case 'critical': return getThemeClasses('bg-red-200/80 text-black border-red-300', 'bg-red-500/20 text-red-300');
+      case 'high': return getThemeClasses('bg-orange-200/80 text-black border-orange-300', 'bg-orange-500/20 text-orange-300');
+      case 'medium': return getThemeClasses('bg-yellow-200/80 text-black border-yellow-300', 'bg-yellow-500/20 text-yellow-300');
+      case 'low': return getThemeClasses('bg-green-200/80 text-black border-green-300', 'bg-green-500/20 text-green-300');
+      default: return getThemeClasses('bg-gray-200/80 text-black border-gray-300', 'bg-gray-500/20 text-gray-300');
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'completed': return 'bg-green-500/20 text-green-300';
-      case 'in_progress': return 'bg-blue-500/20 text-blue-300';
-      case 'scheduled': return 'bg-yellow-500/20 text-yellow-300';
-      case 'cancelled': return 'bg-red-500/20 text-red-300';
-      case 'on_hold': return 'bg-gray-500/20 text-gray-300';
-      default: return 'bg-gray-500/20 text-gray-300';
+      case 'completed': return getThemeClasses('bg-green-200/80 text-black border-green-300', 'bg-green-500/20 text-green-300');
+      case 'in_progress': return getThemeClasses('bg-blue-200/80 text-black border-blue-300', 'bg-blue-500/20 text-blue-300');
+      case 'scheduled': return getThemeClasses('bg-yellow-200/80 text-black border-yellow-300', 'bg-yellow-500/20 text-yellow-300');
+      case 'cancelled': return getThemeClasses('bg-red-200/80 text-black border-red-300', 'bg-red-500/20 text-red-300');
+      case 'on_hold': return getThemeClasses('bg-gray-200/80 text-black border-gray-300', 'bg-gray-500/20 text-gray-300');
+      default: return getThemeClasses('bg-gray-200/80 text-black border-gray-300', 'bg-gray-500/20 text-gray-300');
     }
   };
 
@@ -319,7 +321,7 @@ export default function MaintenancePage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded px-3 py-2"
+            className="bg-white/10 border border-white/20 rounded px-4 py-2"
           >
             <option value="">All Statuses</option>
             <option value="scheduled">Scheduled</option>
@@ -332,7 +334,7 @@ export default function MaintenancePage() {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded px-3 py-2"
+            className="bg-white/10 border border-white/20 rounded px-4 py-2"
           >
             <option value="">All Priorities</option>
             <option value="critical">Critical</option>

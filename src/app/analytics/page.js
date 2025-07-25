@@ -15,9 +15,11 @@ import {
   FaPieChart
 } from "react-icons/fa";
 import { useToast } from "@/context/ToastContext";
+import { useTheme } from "@/context/ThemeContext";
 import SkeletonTable from "@/components/SkeletonTable";
 
 export default function AnalyticsPage() {
+  const { theme, getCardStyles, getThemeClasses } = useTheme();
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('monthly');
@@ -95,7 +97,7 @@ export default function AnalyticsPage() {
         value: `₹${(analyticsData.totalRevenue || 0).toLocaleString()}`,
         change: `${analyticsData.revenueGrowth > 0 ? '+' : ''}${(analyticsData.revenueGrowth || 0).toFixed(1)}%`,
         trend: analyticsData.revenueGrowth >= 0 ? 'up' : 'down',
-        icon: <FaCreditCard className="text-green-400" size={20} />,
+        icon: <FaCreditCard className={getThemeClasses("text-emerald-600", "text-green-400")} size={20} />,
         color: "green"
       },
       {
@@ -103,7 +105,7 @@ export default function AnalyticsPage() {
         value: analyticsData.activeRiders || 0,
         change: `${analyticsData.riderGrowth > 0 ? '+' : ''}${(analyticsData.riderGrowth || 0).toFixed(1)}%`,
         trend: analyticsData.riderGrowth >= 0 ? 'up' : 'down',
-        icon: <FaUsers className="text-blue-400" size={20} />,
+        icon: <FaUsers className={getThemeClasses("text-blue-600", "text-blue-400")} size={20} />,
         color: "blue"
       },
       {
@@ -111,7 +113,7 @@ export default function AnalyticsPage() {
         value: `${(analyticsData.utilizationRate || 0).toFixed(1)}%`,
         change: `${analyticsData.utilizationGrowth > 0 ? '+' : ''}${(analyticsData.utilizationGrowth || 0).toFixed(1)}%`,
         trend: analyticsData.utilizationGrowth >= 0 ? 'up' : 'down',
-        icon: <FaBicycle className="text-purple-400" size={20} />,
+        icon: <FaBicycle className={getThemeClasses("text-purple-600", "text-purple-400")} size={20} />,
         color: "purple"
       },
       {
@@ -119,7 +121,7 @@ export default function AnalyticsPage() {
         value: `₹${(analyticsData.avgRevenuePerRider || 0).toLocaleString()}`,
         change: `${analyticsData.revenuePerRiderGrowth > 0 ? '+' : ''}${(analyticsData.revenuePerRiderGrowth || 0).toFixed(1)}%`,
         trend: analyticsData.revenuePerRiderGrowth >= 0 ? 'up' : 'down',
-        icon: <FaChartLine className="text-orange-400" size={20} />,
+        icon: <FaChartLine className={getThemeClasses("text-orange-600", "text-orange-400")} size={20} />,
         color: "orange"
       }
     ];
@@ -135,11 +137,11 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center">
-            <FaChartBar className="mr-3 text-blue-400" />
+          <h1 className={`text-3xl font-bold ${theme.colors.textPrimary} flex items-center`}>
+            <FaChartBar className={`mr-3 ${getThemeClasses("text-blue-600", "text-blue-400")}`} />
             Analytics Dashboard
           </h1>
-          <p className="text-gray-400 mt-1">Comprehensive insights into your fleet performance</p>
+          <p className={`${theme.colors.textMuted} mt-1`}>Comprehensive insights into your fleet performance</p>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-4">
@@ -147,7 +149,7 @@ export default function AnalyticsPage() {
           <select 
             value={period} 
             onChange={(e) => setPeriod(e.target.value)}
-            className="bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-600"
+            className={`${theme.colors.input} px-4 py-2 rounded-lg ${getThemeClasses("border border-slate-300", "border border-gray-600")}`}
           >
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
@@ -162,13 +164,13 @@ export default function AnalyticsPage() {
               type="date"
               value={dateRange.startDate}
               onChange={(e) => setDateRange(prev => ({...prev, startDate: e.target.value}))}
-              className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-600 text-sm"
+              className={`${theme.colors.input} px-4 py-2 rounded-lg ${getThemeClasses("border border-slate-300", "border border-gray-600")} text-sm`}
             />
             <input
               type="date"
               value={dateRange.endDate}
               onChange={(e) => setDateRange(prev => ({...prev, endDate: e.target.value}))}
-              className="bg-gray-800 text-white px-3 py-2 rounded-lg border border-gray-600 text-sm"
+              className={`${theme.colors.input} px-4 py-2 rounded-lg ${getThemeClasses("border border-slate-300", "border border-gray-600")} text-sm`}
             />
           </div>
 
@@ -196,19 +198,19 @@ export default function AnalyticsPage() {
                 initial="hidden"
                 animate="visible"
                 transition={{ delay: index * 0.1 }}
-                className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
+                className={`${getCardStyles()} p-6 rounded-2xl glass-card`}
               >
                 <div className="flex items-center justify-between mb-4">
                   {card.icon}
                   <div className={`flex items-center gap-1 text-sm ${
-                    card.trend === 'up' ? 'text-green-400' : 'text-red-400'
+                    card.trend === 'up' ? getThemeClasses('text-emerald-600', 'text-green-400') : getThemeClasses('text-red-600', 'text-red-400')
                   }`}>
                     {card.trend === 'up' ? <FaArrowUp size={12} /> : <FaArrowDown size={12} />}
                     {card.change}
                   </div>
                 </div>
-                <h3 className="text-gray-400 text-sm mb-1">{card.title}</h3>
-                <p className="text-2xl font-bold text-white">{card.value}</p>
+                <h3 className={`${theme.colors.textMuted} text-sm mb-1`}>{card.title}</h3>
+                <p className={`text-2xl font-bold ${theme.colors.textPrimary}`}>{card.value}</p>
               </motion.div>
             ))}
           </div>
@@ -221,11 +223,11 @@ export default function AnalyticsPage() {
               initial="hidden"
               animate="visible"
               transition={{ delay: 0.5 }}
-              className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
+              className={`${getCardStyles()} p-6 rounded-2xl glass-card`}
             >
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-white">Revenue Trend</h3>
-                <FaChartLine className="text-green-400" size={20} />
+                <h3 className={`text-lg font-semibold ${theme.colors.textPrimary}`}>Revenue Trend</h3>
+                <FaChartLine className={getThemeClasses('text-emerald-600', 'text-green-400')} size={20} />
               </div>
               <div className="h-64 flex items-center justify-center">
                 {analyticsData?.revenueByPeriod?.length > 0 ? (
@@ -239,7 +241,7 @@ export default function AnalyticsPage() {
                               height: `${Math.max((data.revenue / Math.max(...analyticsData.revenueByPeriod.map(d => d.revenue))) * 100, 5)}%`
                             }}
                           />
-                          <span className="text-xs text-gray-400 mt-2">
+                          <span className={`text-xs ${theme.colors.textMuted} mt-2`}>
                             {new Date(data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </span>
                         </div>
@@ -247,7 +249,7 @@ export default function AnalyticsPage() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-400">No revenue data available for selected period</p>
+                  <p className={`${theme.colors.textMuted}`}>No revenue data available for selected period</p>
                 )}
               </div>
             </motion.div>
@@ -258,11 +260,11 @@ export default function AnalyticsPage() {
               initial="hidden"
               animate="visible"
               transition={{ delay: 0.6 }}
-              className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
+              className={`${getCardStyles()} p-6 rounded-2xl glass-card`}
             >
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-white">Top Performing Riders</h3>
-                <FaUsers className="text-blue-400" size={20} />
+                <h3 className={`text-lg font-semibold ${theme.colors.textPrimary}`}>Top Performing Riders</h3>
+                <FaUsers className={getThemeClasses('text-blue-600', 'text-blue-400')} size={20} />
               </div>
               <div className="space-y-4">
                 {analyticsData?.topRiders?.slice(0, 5).map((rider, index) => (
@@ -272,17 +274,17 @@ export default function AnalyticsPage() {
                         {index + 1}
                       </div>
                       <div>
-                        <p className="text-white text-sm font-medium">{rider.name}</p>
-                        <p className="text-gray-400 text-xs">{rider.email}</p>
+                        <p className={`${theme.colors.textPrimary} text-sm font-medium`}>{rider.name}</p>
+                        <p className={`${theme.colors.textMuted} text-xs`}>{rider.email}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-green-400 text-sm font-medium">₹{(rider.totalRevenue || 0).toLocaleString()}</p>
-                      <p className="text-gray-400 text-xs">{rider.totalAssignments || 0} rides</p>
+                      <p className={`${getThemeClasses('text-emerald-600', 'text-green-400')} text-sm font-medium`}>₹{(rider.totalRevenue || 0).toLocaleString()}</p>
+                      <p className={`${theme.colors.textMuted} text-xs`}>{rider.totalAssignments || 0} rides</p>
                     </div>
                   </div>
                 )) || (
-                  <p className="text-gray-400 text-center">No rider data available</p>
+                  <p className={`${theme.colors.textMuted} text-center`}>No rider data available</p>
                 )}
               </div>
             </motion.div>
@@ -294,25 +296,25 @@ export default function AnalyticsPage() {
             initial="hidden"
             animate="visible"
             transition={{ delay: 0.7 }}
-            className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
+            className={`${getCardStyles()} p-6 rounded-2xl glass-card`}
           >
-            <h3 className="text-lg font-semibold text-white mb-6">Fleet Performance Metrics</h3>
+            <h3 className={`text-lg font-semibold ${theme.colors.textPrimary} mb-6`}>Fleet Performance Metrics</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="text-center">
-                <h4 className="text-gray-400 text-sm mb-2">Average Trip Duration</h4>
-                <p className="text-2xl font-bold text-white">{analyticsData?.avgTripDuration || 0} hrs</p>
+                <h4 className={`${theme.colors.textMuted} text-sm mb-2`}>Average Trip Duration</h4>
+                <p className={`text-2xl font-bold ${theme.colors.textPrimary}`}>{analyticsData?.avgTripDuration || 0} hrs</p>
               </div>
               <div className="text-center">
-                <h4 className="text-gray-400 text-sm mb-2">Total Distance Covered</h4>
-                <p className="text-2xl font-bold text-white">{(analyticsData?.totalDistance || 0).toLocaleString()} km</p>
+                <h4 className={`${theme.colors.textMuted} text-sm mb-2`}>Total Distance Covered</h4>
+                <p className={`text-2xl font-bold ${theme.colors.textPrimary}`}>{(analyticsData?.totalDistance || 0).toLocaleString()} km</p>
               </div>
               <div className="text-center">
-                <h4 className="text-gray-400 text-sm mb-2">Maintenance Cost</h4>
-                <p className="text-2xl font-bold text-white">₹{(analyticsData?.maintenanceCost || 0).toLocaleString()}</p>
+                <h4 className={`${theme.colors.textMuted} text-sm mb-2`}>Maintenance Cost</h4>
+                <p className={`text-2xl font-bold ${theme.colors.textPrimary}`}>₹{(analyticsData?.maintenanceCost || 0).toLocaleString()}</p>
               </div>
               <div className="text-center">
-                <h4 className="text-gray-400 text-sm mb-2">Customer Satisfaction</h4>
-                <p className="text-2xl font-bold text-white">{(analyticsData?.avgRating || 0).toFixed(1)}/5.0</p>
+                <h4 className={`${theme.colors.textMuted} text-sm mb-2`}>Customer Satisfaction</h4>
+                <p className={`text-2xl font-bold ${theme.colors.textPrimary}`}>{(analyticsData?.avgRating || 0).toFixed(1)}/5.0</p>
               </div>
             </div>
           </motion.div>
@@ -323,56 +325,56 @@ export default function AnalyticsPage() {
             initial="hidden"
             animate="visible"
             transition={{ delay: 0.8 }}
-            className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 p-6 rounded-2xl border border-gray-700/50"
+            className={`${getCardStyles()} p-6 rounded-2xl glass-card`}
           >
-            <h3 className="text-lg font-semibold text-white mb-6">Period Summary</h3>
+            <h3 className={`text-lg font-semibold ${theme.colors.textPrimary} mb-6`}>Period Summary</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <h4 className="text-gray-400 text-sm mb-3">Revenue Breakdown</h4>
+                <h4 className={`${theme.colors.textMuted} text-sm mb-3`}>Revenue Breakdown</h4>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-300">Monthly Rent</span>
-                    <span className="text-green-400">₹{(analyticsData?.revenueBreakdown?.monthlyRent || 0).toLocaleString()}</span>
+                    <span className={`${theme.colors.textSecondary}`}>Monthly Rent</span>
+                    <span className={getThemeClasses('text-emerald-600', 'text-green-400')}>₹{(analyticsData?.revenueBreakdown?.monthlyRent || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-300">Deposits</span>
-                    <span className="text-blue-400">₹{(analyticsData?.revenueBreakdown?.deposits || 0).toLocaleString()}</span>
+                    <span className={`${theme.colors.textSecondary}`}>Deposits</span>
+                    <span className={getThemeClasses('text-blue-600', 'text-blue-400')}>₹{(analyticsData?.revenueBreakdown?.deposits || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-300">Late Fees</span>
-                    <span className="text-orange-400">₹{(analyticsData?.revenueBreakdown?.lateFees || 0).toLocaleString()}</span>
+                    <span className={`${theme.colors.textSecondary}`}>Late Fees</span>
+                    <span className={getThemeClasses('text-orange-600', 'text-orange-400')}>₹{(analyticsData?.revenueBreakdown?.lateFees || 0).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
               
               <div>
-                <h4 className="text-gray-400 text-sm mb-3">Bike Categories</h4>
+                <h4 className={`${theme.colors.textMuted} text-sm mb-3`}>Bike Categories</h4>
                 <div className="space-y-2">
                   {analyticsData?.bikeCategories?.map((category) => (
                     <div key={category.category} className="flex justify-between">
-                      <span className="text-gray-300 capitalize">{category.category}</span>
-                      <span className="text-blue-400">{category.count} bikes</span>
+                      <span className={`${theme.colors.textSecondary} capitalize`}>{category.category}</span>
+                      <span className={getThemeClasses('text-blue-600', 'text-blue-400')}>{category.count} bikes</span>
                     </div>
                   )) || (
-                    <p className="text-gray-500 text-sm">No category data</p>
+                    <p className={`${theme.colors.textMuted} text-sm`}>No category data</p>
                   )}
                 </div>
               </div>
               
               <div>
-                <h4 className="text-gray-400 text-sm mb-3">Payment Status</h4>
+                <h4 className={`${theme.colors.textMuted} text-sm mb-3`}>Payment Status</h4>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-gray-300">Paid</span>
-                    <span className="text-green-400">{analyticsData?.paymentStatus?.paid || 0}</span>
+                    <span className={`${theme.colors.textSecondary}`}>Paid</span>
+                    <span className={getThemeClasses('text-emerald-600', 'text-green-400')}>{analyticsData?.paymentStatus?.paid || 0}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-300">Pending</span>
-                    <span className="text-yellow-400">{analyticsData?.paymentStatus?.pending || 0}</span>
+                    <span className={`${theme.colors.textSecondary}`}>Pending</span>
+                    <span className={getThemeClasses('text-amber-600', 'text-yellow-400')}>{analyticsData?.paymentStatus?.pending || 0}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-300">Overdue</span>
-                    <span className="text-red-400">{analyticsData?.paymentStatus?.overdue || 0}</span>
+                    <span className={`${theme.colors.textSecondary}`}>Overdue</span>
+                    <span className={getThemeClasses('text-red-600', 'text-red-400')}>{analyticsData?.paymentStatus?.overdue || 0}</span>
                   </div>
                 </div>
               </div>
